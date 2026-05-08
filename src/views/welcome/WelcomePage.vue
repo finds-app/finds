@@ -1,8 +1,12 @@
+<script setup lang="ts">
+import { IonPage, IonContent, IonButton } from '@ionic/vue'
+import { COMMUNITY_COLORS, ROUTES } from '@/constants'
+</script>
+
 <template>
   <ion-page>
     <ion-content :fullscreen="true" class="[--background:#0E1F1A]">
 
-      <!-- dot grid background -->
       <div
         class="fixed inset-0 pointer-events-none opacity-40"
         style="background-image: radial-gradient(circle, rgba(82,183,136,0.3) 1px, transparent 1px); background-size: 36px 36px;"
@@ -25,20 +29,19 @@
           the disappearing, the overlooked.
         </p>
 
-        <!-- seven community colour dots -->
         <div class="flex gap-2 mb-12">
           <span
-            v-for="c in communities"
-            :key="c.color"
+            v-for="color in COMMUNITY_COLORS"
+            :key="color"
             class="w-2 h-2 rounded-full opacity-80"
-            :style="{ background: c.color }"
+            :style="{ background: color }"
           />
         </div>
 
         <div class="w-full max-w-xs">
           <ion-button
             expand="block"
-            router-link="/auth"
+            :router-link="ROUTES.auth"
             class="[--background:#52B788] [--background-activated:#48a077] [--color:#1A3C34] [--border-radius:14px] [--padding-top:18px] [--padding-bottom:18px] font-medium text-base mb-3"
           >
             Get started
@@ -52,17 +55,3 @@
     </ion-content>
   </ion-page>
 </template>
-
-<script setup lang="ts">
-import { IonPage, IonContent, IonButton } from '@ionic/vue'
-
-const communities = [
-  { color: '#F2CC60' },
-  { color: '#52B788' },
-  { color: '#AFA9EC' },
-  { color: '#E07A5F' },
-  { color: '#85B7EB' },
-  { color: '#ED93B1' },
-  { color: '#97C459' },
-]
-</script>

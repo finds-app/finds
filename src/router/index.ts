@@ -1,26 +1,31 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router'
 import type { RouteRecordRaw } from 'vue-router'
+import { ROUTES } from '@/constants'
 import { useAuthStore } from '@/stores/auth'
-import TabsPage from '../views/TabsPage.vue'
+import TabsPage from '@/views/tabs/TabsPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    redirect: '/tabs/tab1',
+    path: ROUTES.root,
+    redirect: ROUTES.feed,
   },
   {
-    path: '/welcome',
-    component: () => import('@/views/WelcomePage.vue'),
+    path: ROUTES.welcome,
+    component: () => import('@/views/welcome/WelcomePage.vue'),
     meta: { public: true },
   },
   {
-    path: '/auth',
-    component: () => import('@/views/AuthPage.vue'),
+    path: ROUTES.auth,
+    component: () => import('@/views/auth/AuthPage.vue'),
     meta: { public: true },
   },
   {
-    path: '/onboarding',
-    component: () => import('@/views/OnboardingPage.vue'),
+    path: ROUTES.onboarding,
+    component: () => import('@/views/onboarding/OnboardingPage.vue'),
+  },
+  {
+    path: ROUTES.postFind,
+    component: () => import('@/views/post-find/PostFindPage.vue'),
   },
   {
     path: '/tabs/',
@@ -28,19 +33,19 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: '',
-        redirect: '/tabs/tab1',
+        redirect: ROUTES.feed,
       },
       {
         path: 'tab1',
-        component: () => import('@/views/Tab1Page.vue'),
+        component: () => import('@/views/feed/FeedPage.vue'),
       },
       {
         path: 'tab2',
-        component: () => import('@/views/Tab2Page.vue'),
+        component: () => import('@/views/discover/DiscoverPage.vue'),
       },
       {
         path: 'tab3',
-        component: () => import('@/views/Tab3Page.vue'),
+        component: () => import('@/views/profile/ProfilePage.vue'),
       },
     ],
   },
@@ -54,24 +59,13 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
 
-  // Wait for the initial session check before deciding
-  if (auth.loading) {
-    await auth.init()
-  }
+  if (auth.loading) await auth.init()
 
   const isPublic = to.meta.public === true
 
-  if (!auth.isLoggedIn && !isPublic) {
-    return '/welcome'
-  }
-
-  if (auth.isLoggedIn && !auth.hasProfile && to.path !== '/onboarding') {
-    return '/onboarding'
-  }
-
-  if (auth.isLoggedIn && auth.hasProfile && isPublic) {
-    return '/tabs/tab1'
-  }
+  if (!auth.isLoggedIn && !isPublic) return ROUTES.welcome
+  if (auth.isLoggedIn && !auth.hasProfile && to.path !== ROUTES.onboarding) return ROUTES.onboarding
+  if (auth.isLoggedIn && auth.hasProfile && isPublic) return ROUTES.feed
 })
 
 export default router

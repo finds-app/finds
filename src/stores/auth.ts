@@ -1,17 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { supabase } from '@/lib/supabase'
-import type { User, Session } from '@supabase/supabase-js'
-
-interface Profile {
-  username: string
-  display_name: string | null
-}
+import type { User as AuthUser, Session } from '@supabase/supabase-js'
+import type { UserDto } from '@/types'
+import * as authService from '@/services/auth.service'
+import * as usersService from '@/services/users.service'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null)
+  const user = ref<AuthUser | null>(null)
   const session = ref<Session | null>(null)
-  const profile = ref<Profile | null>(null)
+  const profile = ref<UserDto | null>(null)
   const loading = ref(true)
 
   const isLoggedIn = computed(() => !!session.value)
@@ -20,53 +17,57 @@ export const useAuthStore = defineStore('auth', () => {
   // Cached promise so init() is safe to call from multiple places
   let initPromise: Promise<void> | null = null
 
-  function init() {
+  const fetchProfile = async (): Promise<void> => {
+    if (!user.value) {
+      profile.value = null
+      return
+    }
+    profile.value = await usersService.fetchProfile(user.value.id)
+  }
+
+  const init = () => {
     if (initPromise) return initPromise
     initPromise = _init()
     return initPromise
   }
 
-  async function _init() {
-    const { data } = await supabase.auth.getSession()
-    session.value = data.session
-    user.value = data.session?.user ?? null
-    if (user.value) await fetchProfile()
-    loading.value = false
+  const _init = async (): Promise<void> => {
+    try {
+      session.value = await authService.getCurrentSession()
+      user.value = session.value?.user ?? null
+      if (user.value) await fetchProfile()
 
-    supabase.auth.onAuthStateChange(async (_event: string, newSession: Session | null) => {
-      session.value = newSession
-      user.value = newSession?.user ?? null
-      if (user.value) {
-        await fetchProfile()
-      } else {
-        profile.value = null
-      }
+      authService.onAuthSessionChange(async (newSession) => {
+        await setSession(newSession)
+      })
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const setSession = async (newSession: Session | null): Promise<void> => {
+    session.value = newSession
+    user.value = newSession?.user ?? null
+    if (user.value) {
+      await fetchProfile()
+    } else {
+      profile.value = null
+    }
+  }
+
+  const createProfile = async (username: string, displayName: string): Promise<UserDto> => {
+    if (!user.value) throw new Error('Not logged in')
+    const createdProfile = await usersService.createProfile({
+      userId: user.value.id,
+      username,
+      displayName,
     })
+    profile.value = createdProfile
+    return createdProfile
   }
 
-  async function fetchProfile() {
-    if (!user.value) return
-    const { data } = await supabase
-      .from('users')
-      .select('username, display_name')
-      .eq('id', user.value.id)
-      .maybeSingle()
-    profile.value = data
-  }
-
-  async function createProfile(username: string, displayName: string) {
-    if (!user.value) return { error: new Error('Not logged in') }
-    const { error } = await supabase.from('users').insert({
-      id: user.value.id,
-      username: username.toLowerCase().trim(),
-      display_name: displayName.trim(),
-    })
-    if (!error) await fetchProfile()
-    return { error }
-  }
-
-  async function signOut() {
-    await supabase.auth.signOut()
+  const signOut = async (): Promise<void> => {
+    await authService.signOut()
     profile.value = null
   }
 
