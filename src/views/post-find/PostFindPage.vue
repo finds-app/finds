@@ -31,8 +31,8 @@ const { caption, community, canPost, posting, postError, toggleCommunity, post }
       @post="post"
     />
 
-    <ion-content class="[--background:#0E1F1A]">
-      <div class="flex flex-col min-h-full">
+    <ion-content :fullscreen="true" class="[--background:#0E1F1A]">
+      <div class="flex flex-col">
         <PostFindImagePicker :image-preview="imagePreview" @pick="pickImage" />
 
         <div class="flex flex-col gap-0 px-5 py-4">
@@ -40,9 +40,11 @@ const { caption, community, canPost, posting, postError, toggleCommunity, post }
           <PostFindLocationRow :location-name="locationName" :location-loading="locationLoading" />
           <PostFindCommunityPicker :selected-community="community" @select="toggleCommunity" />
         </div>
+
+        <PostFindError :message="postError" />
       </div>
 
-      <PostFindError :message="postError" />
+      <div class="pb-[env(safe-area-inset-bottom,16px)]" />
     </ion-content>
   </ion-page>
 </template>

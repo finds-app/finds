@@ -23,10 +23,8 @@ const router = useRouter()
           <ion-label>Explore</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button class="[--color:transparent] [--color-selected:transparent]" @click="router.push(ROUTES.postFind)">
-          <div class="w-[52px] h-[52px] rounded-2xl bg-sage flex items-center justify-center -mt-3">
-            <ion-icon :icon="addOutline" class="text-[28px] text-forest" />
-          </div>
+        <ion-tab-button disabled class="[--color:transparent] [--color-selected:transparent] opacity-0">
+          <ion-icon :icon="addOutline" />
         </ion-tab-button>
 
         <ion-tab-button tab="tab3" :href="ROUTES.profile" class="[--color:rgba(255,255,255,0.35)] [--color-selected:#52B788]">
@@ -41,5 +39,12 @@ const router = useRouter()
 
       </ion-tab-bar>
     </ion-tabs>
+
+    <button
+      class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,0px)+16px)] z-50 w-[56px] h-[56px] rounded-2xl bg-sage flex items-center justify-center shadow-lg shadow-sage/25 active:scale-95 transition-transform"
+      @click="router.push(ROUTES.postFind)"
+    >
+      <ion-icon :icon="addOutline" class="text-[28px] text-forest" />
+    </button>
   </ion-page>
 </template>

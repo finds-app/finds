@@ -1,6 +1,7 @@
 import type {
   Achievement,
   CommunityId,
+  FeedItem,
   Find,
   Follow,
   Reaction,
@@ -11,6 +12,7 @@ import type {
 
 export type UserDto = User
 export type FindDto = Find
+export type FeedItemDto = FeedItem
 export type ReactionDto = Reaction
 export type FollowDto = Follow
 export type AchievementDto = Achievement

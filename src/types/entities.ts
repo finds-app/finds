@@ -67,3 +67,17 @@ export interface Tag {
   addedBy: string | null
   createdAt: string
 }
+
+export interface FeedItem {
+  id: string
+  imageUrl: string
+  caption: string | null
+  locationName: string | null
+  community: CommunityId | null
+  createdAt: string
+  user: {
+    id: string
+    username: string
+    avatarUrl: string | null
+  }
+}
