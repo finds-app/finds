@@ -1,2 +1,30 @@
-/* For information on how to create your own theme, please refer to:
-http://ionicframework.com/docs/theming/ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* finds design tokens — Ionic CSS variable overrides */
+:root {
+  --finds-font-display: 'Fraunces', serif;
+  --finds-font-body: 'DM Sans', sans-serif;
+
+  --ion-font-family: var(--finds-font-body);
+  --ion-background-color: #0E1F1A;
+  --ion-background-color-rgb: 14, 31, 26;
+  --ion-text-color: #F8F4EF;
+  --ion-text-color-rgb: 248, 244, 239;
+
+  --ion-color-primary: #52B788;
+  --ion-color-primary-rgb: 82, 183, 136;
+  --ion-color-primary-contrast: #1A3C34;
+  --ion-color-primary-contrast-rgb: 26, 60, 52;
+  --ion-color-primary-shade: #48a077;
+  --ion-color-primary-tint: #63bf94;
+
+  --ion-toolbar-background: #0E1F1A;
+  --ion-toolbar-color: #F8F4EF;
+  --ion-tab-bar-background: #0A1712;
+  --ion-tab-bar-color: rgba(255, 255, 255, 0.35);
+  --ion-tab-bar-color-selected: #52B788;
+  --ion-item-background: transparent;
+  --ion-card-background: #152B23;
+}
