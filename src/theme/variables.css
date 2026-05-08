@@ -2,12 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* finds design tokens — Ionic CSS variable overrides */
+/* Ionic CSS variable overrides for the finds dark theme */
 :root {
-  --finds-font-display: 'Fraunces', serif;
-  --finds-font-body: 'DM Sans', sans-serif;
-
-  --ion-font-family: var(--finds-font-body);
+  --ion-font-family: 'DM Sans', sans-serif;
   --ion-background-color: #0E1F1A;
   --ion-background-color-rgb: 14, 31, 26;
   --ion-text-color: #F8F4EF;

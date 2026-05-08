@@ -72,8 +72,13 @@
 import { ref } from 'vue'
 import { IonPage, IonContent, IonButton, IonInput, IonIcon, IonSpinner } from '@ionic/vue'
 import { arrowBack } from 'ionicons/icons'
+import { Capacitor } from '@capacitor/core'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
+
+const redirectTo = Capacitor.isNativePlatform()
+  ? 'io.finds.app://login-callback'
+  : window.location.origin
 
 const router = useRouter()
 const email = ref('')
@@ -89,7 +94,7 @@ async function submit() {
 
   const { error } = await supabase.auth.signInWithOtp({
     email: email.value.trim(),
-    options: { emailRedirectTo: window.location.origin },
+    options: { emailRedirectTo: redirectTo },
   })
 
   loading.value = false

@@ -17,7 +17,16 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoggedIn = computed(() => !!session.value)
   const hasProfile = computed(() => !!profile.value?.username)
 
-  async function init() {
+  // Cached promise so init() is safe to call from multiple places
+  let initPromise: Promise<void> | null = null
+
+  function init() {
+    if (initPromise) return initPromise
+    initPromise = _init()
+    return initPromise
+  }
+
+  async function _init() {
     const { data } = await supabase.auth.getSession()
     session.value = data.session
     user.value = data.session?.user ?? null
