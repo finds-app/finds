@@ -28,6 +28,14 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/post-find/PostFindPage.vue'),
   },
   {
+    path: ROUTES.userProfile,
+    component: () => import('@/views/profile/ProfilePage.vue'),
+  },
+  {
+    path: ROUTES.findDetail,
+    component: () => import('@/views/find-detail/FindDetailPage.vue'),
+  },
+  {
     path: '/tabs/',
     component: TabsPage,
     children: [
@@ -60,6 +68,7 @@ router.beforeEach(async (to) => {
   const auth = useAuthStore()
 
   if (auth.loading) await auth.init()
+  await auth.waitForReady()
 
   const isPublic = to.meta.public === true
 

@@ -36,38 +36,6 @@ export interface Find {
 
 export type ReactionType = 'heart'
 
-export interface Reaction {
-  id: string
-  findId: string
-  userId: string
-  type: ReactionType
-  createdAt: string
-}
-
-export interface Follow {
-  id: string
-  followerId: string | null
-  followedId: string | null
-  community: string | null
-  createdAt: string
-}
-
-export interface Achievement {
-  id: string
-  userId: string
-  template: string
-  unlockedAt: string
-  metadata: Record<string, unknown> | null
-}
-
-export interface Tag {
-  id: string
-  findId: string
-  tag: string
-  addedBy: string | null
-  createdAt: string
-}
-
 export interface FeedItem {
   id: string
   imageUrl: string
@@ -75,9 +43,32 @@ export interface FeedItem {
   locationName: string | null
   community: CommunityId | null
   createdAt: string
+  reactionCount: number
+  hasReacted: boolean
+  hasSaved: boolean
   user: {
     id: string
     username: string
+    avatarUrl: string | null
+  }
+}
+
+export interface FindDetail {
+  id: string
+  imageUrl: string
+  caption: string | null
+  locationName: string | null
+  lat: number | null
+  lng: number | null
+  community: CommunityId | null
+  createdAt: string
+  reactionCount: number
+  hasReacted: boolean
+  hasSaved: boolean
+  user: {
+    id: string
+    username: string
+    displayName: string | null
     avatarUrl: string | null
   }
 }

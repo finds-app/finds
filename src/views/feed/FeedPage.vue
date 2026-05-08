@@ -13,6 +13,10 @@ const {
   fullscreenImage,
   refresh,
   loadMore,
+  toggleReaction,
+  toggleSave,
+  goToFind,
+  goToUser,
   openFullscreen,
   closeFullscreen,
 } = useFeed()
@@ -48,7 +52,10 @@ const handleInfinite = async (event: CustomEvent) => {
           v-for="item in items"
           :key="item.id"
           :item="item"
-          @tap-image="openFullscreen"
+          @tap-image="() => goToFind(item.id)"
+          @toggle-reaction="toggleReaction"
+          @toggle-save="toggleSave"
+          @tap-user="goToUser"
         />
       </div>
 

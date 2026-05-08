@@ -27,12 +27,12 @@ const router = useRouter()
           <ion-icon :icon="addOutline" />
         </ion-tab-button>
 
-        <ion-tab-button tab="tab3" :href="ROUTES.profile" class="[--color:rgba(255,255,255,0.35)] [--color-selected:#52B788]">
+        <ion-tab-button disabled class="[--color:rgba(255,255,255,0.35)] [--color-selected:#52B788] opacity-40">
           <ion-icon :icon="ribbonOutline" />
           <ion-label>Trophies</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button class="[--color:rgba(255,255,255,0.35)] [--color-selected:#52B788]">
+        <ion-tab-button tab="tab3" :href="ROUTES.profile" class="[--color:rgba(255,255,255,0.35)] [--color-selected:#52B788]">
           <ion-icon :icon="personOutline" />
           <ion-label>Profile</ion-label>
         </ion-tab-button>

@@ -1,27 +1,16 @@
 import { supabase } from './supabase'
-import type { CreateReactionPayload, ReactionDto, ReactionRow } from '@/types'
+import type { CreateReactionPayload } from '@/types'
 
-const mapReactionRow = (row: ReactionRow): ReactionDto => ({
-  id: row.id,
-  findId: row.find_id,
-  userId: row.user_id,
-  type: row.type,
-  createdAt: row.created_at,
-})
-
-export const createReaction = async (payload: CreateReactionPayload): Promise<ReactionDto> => {
-  const { data, error } = await supabase
+export const createReaction = async (payload: CreateReactionPayload): Promise<void> => {
+  const { error } = await supabase
     .from('reactions')
     .insert({
       find_id: payload.findId,
       user_id: payload.userId,
       type: payload.type ?? 'heart',
     })
-    .select('*')
-    .single()
 
   if (error) throw error
-  return mapReactionRow(data as ReactionRow)
 }
 
 export const deleteReaction = async (findId: string, userId: string): Promise<void> => {
@@ -34,13 +23,16 @@ export const deleteReaction = async (findId: string, userId: string): Promise<vo
   if (error) throw error
 }
 
-export const getReactionsForFind = async (findId: string): Promise<ReactionDto[]> => {
+export const getUserReactedFindIds = async (userId: string, findIds: string[]): Promise<Set<string>> => {
+  if (findIds.length === 0) return new Set()
+
   const { data, error } = await supabase
     .from('reactions')
-    .select('*')
-    .eq('find_id', findId)
-    .order('created_at', { ascending: false })
+    .select('find_id')
+    .eq('user_id', userId)
+    .in('find_id', findIds)
 
   if (error) throw error
-  return ((data ?? []) as ReactionRow[]).map(mapReactionRow)
+  return new Set((data ?? []).map((r: { find_id: string }) => r.find_id))
 }
+

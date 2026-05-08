@@ -1,22 +1,16 @@
 import type {
-  Achievement,
   CommunityId,
   FeedItem,
   Find,
-  Follow,
-  Reaction,
+  FindDetail,
   ReactionType,
-  Tag,
   User,
 } from './entities'
 
 export type UserDto = User
 export type FindDto = Find
 export type FeedItemDto = FeedItem
-export type ReactionDto = Reaction
-export type FollowDto = Follow
-export type AchievementDto = Achievement
-export type TagDto = Tag
+export type FindDetailDto = FindDetail
 
 export interface CreateUserProfilePayload {
   userId: string
@@ -47,10 +41,10 @@ export interface CreateReactionPayload {
   type?: ReactionType
 }
 
-export interface CreateFollowPayload {
-  followerId: string
-  followedId?: string | null
-  community?: string | null
+export interface ProfileStatsDto {
+  findsCount: number
+  followersCount: number
+  followingCount: number
 }
 
 export interface UploadedFileDto {

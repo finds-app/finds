@@ -14,8 +14,8 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoggedIn = computed(() => !!session.value)
   const hasProfile = computed(() => !!profile.value?.username)
 
-  // Cached promise so init() is safe to call from multiple places
   let initPromise: Promise<void> | null = null
+  let sessionPromise: Promise<void> | null = null
 
   const fetchProfile = async (): Promise<void> => {
     if (!user.value) {
@@ -45,14 +45,21 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const setSession = async (newSession: Session | null): Promise<void> => {
+  const setSession = (newSession: Session | null): Promise<void> => {
     session.value = newSession
     user.value = newSession?.user ?? null
     if (user.value) {
-      await fetchProfile()
+      sessionPromise = fetchProfile()
     } else {
       profile.value = null
+      sessionPromise = null
     }
+    return sessionPromise ?? Promise.resolve()
+  }
+
+  const waitForReady = async (): Promise<void> => {
+    if (initPromise) await initPromise
+    if (sessionPromise) await sessionPromise
   }
 
   const createProfile = async (username: string, displayName: string): Promise<UserDto> => {
@@ -74,6 +81,6 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     user, session, profile, loading,
     isLoggedIn, hasProfile,
-    init, fetchProfile, createProfile, signOut,
+    init, waitForReady, fetchProfile, createProfile, signOut,
   }
 })

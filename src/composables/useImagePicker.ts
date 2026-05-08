@@ -63,10 +63,5 @@ export const useImagePicker = (options: Options = {}) => {
     }
   }
 
-  const clear = () => {
-    imagePreview.value = null
-    imageBlob.value = null
-  }
-
-  return { imagePreview, imageBlob, pickImage, clear }
+  return { imagePreview, imageBlob, pickImage }
 }

@@ -1,12 +1,4 @@
-import type { CommunityId, ReactionType } from './entities'
-
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+import type { CommunityId } from './entities'
 
 export interface UserRow {
   id: string
@@ -26,37 +18,5 @@ export interface FindRow {
   lat: number | string | null
   lng: number | string | null
   community: CommunityId | null
-  created_at: string
-}
-
-export interface ReactionRow {
-  id: string
-  find_id: string
-  user_id: string
-  type: ReactionType
-  created_at: string
-}
-
-export interface FollowRow {
-  id: string
-  follower_id: string | null
-  followed_id: string | null
-  community: string | null
-  created_at: string
-}
-
-export interface AchievementRow {
-  id: string
-  user_id: string
-  template: string
-  unlocked_at: string
-  metadata: Json
-}
-
-export interface TagRow {
-  id: string
-  find_id: string
-  tag: string
-  added_by: string | null
   created_at: string
 }

@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { CreateFindPayload, FeedItemDto, FindDto, FindRow } from '@/types'
+import type { CreateFindPayload, FeedItemDto, FindDetailDto, FindDto, FindRow } from '@/types'
 
 const PAGE_SIZE = 20
 
@@ -26,6 +26,7 @@ interface FeedRowWithUser {
   community: string | null
   created_at: string
   users: { id: string; username: string; avatar_url: string | null }
+  reactions: [{ count: number }]
 }
 
 const mapFeedRow = (row: FeedRowWithUser): FeedItemDto => ({
@@ -35,6 +36,9 @@ const mapFeedRow = (row: FeedRowWithUser): FeedItemDto => ({
   locationName: row.location_name,
   community: row.community as FeedItemDto['community'],
   createdAt: row.created_at,
+  reactionCount: row.reactions?.[0]?.count ?? 0,
+  hasReacted: false,
+  hasSaved: false,
   user: {
     id: row.users.id,
     username: row.users.username,
@@ -45,7 +49,7 @@ const mapFeedRow = (row: FeedRowWithUser): FeedItemDto => ({
 export const getFeed = async (cursor?: string): Promise<FeedItemDto[]> => {
   let query = supabase
     .from('finds')
-    .select('id, image_url, caption, location_name, community, created_at, users(id, username, avatar_url)')
+    .select('id, image_url, caption, location_name, community, created_at, users(id, username, avatar_url), reactions(count)')
     .order('created_at', { ascending: false })
     .limit(PAGE_SIZE)
 
@@ -77,15 +81,49 @@ export const createFind = async (payload: CreateFindPayload): Promise<FindDto> =
   return mapFindRow(data as FindRow)
 }
 
-export const getFindById = async (findId: string): Promise<FindDto | null> => {
+interface DetailRowWithUser {
+  id: string
+  image_url: string
+  caption: string | null
+  location_name: string | null
+  lat: number | string | null
+  lng: number | string | null
+  community: string | null
+  created_at: string
+  users: { id: string; username: string; display_name: string | null; avatar_url: string | null }
+  reactions: [{ count: number }]
+}
+
+export const getFindDetail = async (findId: string): Promise<FindDetailDto | null> => {
   const { data, error } = await supabase
     .from('finds')
-    .select('*')
+    .select('id, image_url, caption, location_name, lat, lng, community, created_at, users(id, username, display_name, avatar_url), reactions(count)')
     .eq('id', findId)
     .maybeSingle()
 
   if (error) throw error
-  return data ? mapFindRow(data as FindRow) : null
+  if (!data) return null
+
+  const row = data as unknown as DetailRowWithUser
+  return {
+    id: row.id,
+    imageUrl: row.image_url,
+    caption: row.caption,
+    locationName: row.location_name,
+    lat: nullableNumber(row.lat),
+    lng: nullableNumber(row.lng),
+    community: row.community as FindDetailDto['community'],
+    createdAt: row.created_at,
+    reactionCount: row.reactions?.[0]?.count ?? 0,
+    hasReacted: false,
+    hasSaved: false,
+    user: {
+      id: row.users.id,
+      username: row.users.username,
+      displayName: row.users.display_name,
+      avatarUrl: row.users.avatar_url,
+    },
+  }
 }
 
 export const getFindsByUser = async (userId: string): Promise<FindDto[]> => {
