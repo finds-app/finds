@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import { IonPage, IonContent } from '@ionic/vue'
 import { useRouter } from 'vue-router'
 import { useImagePicker } from '@/composables/useImagePicker'
-import { useLocation } from '@/composables/useLocation'
+import { usePostLocation } from '@/composables/usePostLocation'
 import { usePostFind } from './usePostFind'
 import PostFindCaptionField from './components/PostFindCaptionField.vue'
 import PostFindCommunityPicker from './components/PostFindCommunityPicker.vue'
@@ -12,13 +13,17 @@ import PostFindImagePicker from './components/PostFindImagePicker.vue'
 import PostFindLocationRow from './components/PostFindLocationRow.vue'
 
 const router = useRouter()
-const { imagePreview, imageBlob, pickImage } = useImagePicker()
-const { locationName, lat, lng, locationLoading } = useLocation()
+const { imagePreview, imageBlob, photoGps, pickImage } = useImagePicker()
+const { locationName, lat, lng, gpsLoading, setFromCoords, detectDeviceLocation, setManualLocation, clearLocation } = usePostLocation()
 const { caption, community, canPost, posting, postError, toggleCommunity, post } = usePostFind({
   imageBlob,
   locationName,
   lat,
   lng,
+})
+
+watch(photoGps, (gps) => {
+  if (gps) setFromCoords(gps.lat, gps.lng)
 })
 </script>
 
@@ -37,7 +42,15 @@ const { caption, community, canPost, posting, postError, toggleCommunity, post }
 
         <div class="flex flex-col gap-0 px-5 py-4">
           <PostFindCaptionField v-model="caption" />
-          <PostFindLocationRow :location-name="locationName" :location-loading="locationLoading" />
+          <PostFindLocationRow
+            :location-name="locationName"
+            :gps-loading="gpsLoading"
+            :has-location="!!locationName"
+            @update:location-name="locationName = $event"
+            @select-place="(name, lat, lng) => setManualLocation(name, lat, lng)"
+            @use-current="detectDeviceLocation"
+            @clear="clearLocation"
+          />
           <PostFindCommunityPicker :selected-community="community" @select="toggleCommunity" />
         </div>
 

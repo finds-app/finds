@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { isPlatform } from '@ionic/vue'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import imageCompression from 'browser-image-compression'
+import exifr from 'exifr'
 
 interface Options {
   maxSizeMB?: number
@@ -13,12 +14,28 @@ export const useImagePicker = (options: Options = {}) => {
 
   const imagePreview = ref<string | null>(null)
   const imageBlob = ref<Blob | null>(null)
+  const photoGps = ref<{ lat: number; lng: number } | null>(null)
 
   const compress = (file: File): Promise<Blob> =>
     imageCompression(file, { maxSizeMB, maxWidthOrHeight, useWebWorker: false })
 
+  const extractGps = async (file: File) => {
+    try {
+      const gps = await exifr.gps(file)
+      const lat = gps?.latitude
+      const lng = gps?.longitude
+      return typeof lat === 'number' && isFinite(lat) && typeof lng === 'number' && isFinite(lng)
+        ? { lat, lng }
+        : null
+    } catch {
+      return null
+    }
+  }
+
   const processFile = async (file: File) => {
     imagePreview.value = URL.createObjectURL(file)
+    // Read EXIF GPS before compression — compression strips metadata
+    photoGps.value = await extractGps(file)
     imageBlob.value = await compress(file)
   }
 
@@ -27,6 +44,8 @@ export const useImagePicker = (options: Options = {}) => {
     const blob = await res.blob()
     const file = new File([blob], 'find.jpg', { type: 'image/jpeg' })
     imagePreview.value = dataUrl
+    // Native Camera DataUrl strips EXIF — no GPS available this way
+    photoGps.value = null
     imageBlob.value = await compress(file)
   }
 
@@ -35,10 +54,16 @@ export const useImagePicker = (options: Options = {}) => {
       const photo = await Camera.getPhoto({
         quality: 85,
         allowEditing: false,
-        resultType: CameraResultType.DataUrl,
+        resultType: CameraResultType.Uri,
         source: CameraSource.Prompt,
       })
-      if (photo.dataUrl) await processDataUrl(photo.dataUrl)
+      if (!photo.webPath) return
+      const res = await fetch(photo.webPath)
+      const blob = await res.blob()
+      const file = new File([blob], 'find.jpg', { type: blob.type || 'image/jpeg' })
+      imagePreview.value = photo.webPath
+      photoGps.value = await extractGps(file)
+      imageBlob.value = await compress(file)
     } catch {
       // user cancelled
     }
@@ -63,5 +88,5 @@ export const useImagePicker = (options: Options = {}) => {
     }
   }
 
-  return { imagePreview, imageBlob, pickImage }
+  return { imagePreview, imageBlob, photoGps, pickImage }
 }
