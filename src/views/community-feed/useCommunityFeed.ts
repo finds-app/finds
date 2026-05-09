@@ -153,6 +153,10 @@ export const useCommunityFeed = () => {
     router.push(buildMapRoute(lat, lng, locationName))
   }
 
+  const goToCommunity = (communityId: string) => {
+    router.push(`/community/${communityId}`)
+  }
+
   const goBack = () => {
     router.back()
   }
@@ -174,6 +178,7 @@ export const useCommunityFeed = () => {
     goToFind,
     goToUser,
     goToMap,
+    goToCommunity,
     goBack,
   }
 }

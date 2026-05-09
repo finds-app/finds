@@ -83,6 +83,10 @@ export const useFindDetail = () => {
     router.push(buildMapRoute(find.value.lat, find.value.lng, find.value.locationName))
   }
 
+  const goToCommunity = (communityId: string) => {
+    router.push(`/community/${communityId}`)
+  }
+
   const goBack = () => {
     router.back()
   }
@@ -96,6 +100,7 @@ export const useFindDetail = () => {
     toggleSave,
     goToUser,
     goToMap,
+    goToCommunity,
     goBack,
   }
 }

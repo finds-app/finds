@@ -126,6 +126,10 @@ export const useFeed = () => {
     router.push(buildMapRoute(lat, lng, locationName))
   }
 
+  const goToCommunity = (communityId: string) => {
+    router.push(`/community/${communityId}`)
+  }
+
   const openFullscreen = (imageUrl: string) => {
     fullscreenImage.value = imageUrl
   }
@@ -150,6 +154,7 @@ export const useFeed = () => {
     goToFind,
     goToUser,
     goToMap,
+    goToCommunity,
     openFullscreen,
     closeFullscreen,
   }

@@ -13,6 +13,7 @@ const {
   toggleSave,
   goToUser,
   goToMap,
+  goToCommunity,
   goBack,
 } = useFindDetail()
 </script>
@@ -35,6 +36,7 @@ const {
           @toggle-save="toggleSave"
           @tap-user="goToUser"
           @tap-location="goToMap"
+          @tap-community="goToCommunity"
         />
       </template>
 

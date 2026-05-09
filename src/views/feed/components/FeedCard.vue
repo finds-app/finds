@@ -17,6 +17,7 @@ const emit = defineEmits<{
   toggleSave: [findId: string]
   tapUser: [userId: string]
   tapLocation: [lat: number, lng: number, locationName: string]
+  tapCommunity: [communityId: string]
 }>()
 
 const communityMeta = props.item.community
@@ -71,13 +72,14 @@ const onLocationTap = (e: Event) => {
             <span class="text-white/55 text-xs font-body">{{ item.locationName }}</span>
           </button>
 
-          <span
+          <button
             v-if="communityMeta"
-            class="px-2 py-0.5 rounded-full text-[10px] font-medium font-body"
+            class="px-2 py-0.5 rounded-full text-[10px] font-medium font-body border-0 m-0 active:opacity-60 transition-opacity"
             :style="{ backgroundColor: communityMeta.color + '22', color: communityMeta.color }"
+            @click="$emit('tapCommunity', item.community!)"
           >
             {{ communityMeta.label }}
-          </span>
+          </button>
         </div>
 
         <div class="flex items-center gap-3">

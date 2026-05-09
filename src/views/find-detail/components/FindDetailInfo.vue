@@ -16,6 +16,7 @@ defineEmits<{
   toggleSave: []
   tapUser: [userId: string]
   tapLocation: []
+  tapCommunity: [communityId: string]
 }>()
 
 const communityMeta = props.find.community
@@ -74,13 +75,14 @@ const communityMeta = props.find.community
         <span class="text-white/50 text-xs font-body">{{ find.locationName }}</span>
       </button>
 
-      <span
+      <button
         v-if="communityMeta"
-        class="px-3 py-1.5 rounded-full text-xs font-medium font-body"
+        class="px-3 py-1.5 rounded-full text-xs font-medium font-body border-0 m-0 active:opacity-60 transition-opacity"
         :style="{ backgroundColor: communityMeta.color + '18', color: communityMeta.color }"
+        @click="$emit('tapCommunity', find.community!)"
       >
         {{ communityMeta.label }}
-      </span>
+      </button>
     </div>
   </div>
 </template>
