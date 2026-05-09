@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { onIonViewDidEnter } from '@ionic/vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { Community, FeedItemDto } from '@/types'
-import { COMMUNITIES, buildMapRoute } from '@/constants'
+import { COMMUNITIES, buildMapRoute, pushUserProfile } from '@/constants'
 import * as findsService from '@/services/finds.service'
 import { useReactions } from '@/composables/useReactions'
 import { useAuthStore } from '@/stores/auth'
@@ -146,7 +146,7 @@ export const useCommunityFeed = () => {
   }
 
   const goToUser = (userId: string) => {
-    router.push(`/user/${userId}`)
+    pushUserProfile(router, userId, authStore.user?.id)
   }
 
   const goToMap = (lat: number, lng: number, locationName?: string) => {

@@ -3,14 +3,14 @@ import { IonPage, IonContent, IonRefresher, IonRefresherContent, IonInfiniteScro
 import { useFeed } from './useFeed'
 import FeedCard from './components/FeedCard.vue'
 import FeedEmpty from './components/FeedEmpty.vue'
-import FeedFullscreen from './components/FeedFullscreen.vue'
 import FeedHeader from './components/FeedHeader.vue'
 
 const {
+  feedMode,
   items,
   loading,
   hasMore,
-  fullscreenImage,
+  setFeedMode,
   refresh,
   loadMore,
   toggleReaction,
@@ -19,8 +19,6 @@ const {
   goToUser,
   goToMap,
   goToCommunity,
-  openFullscreen,
-  closeFullscreen,
 } = useFeed()
 
 const handleRefresh = async (event: CustomEvent) => {
@@ -36,9 +34,12 @@ const handleInfinite = async (event: CustomEvent) => {
 
 <template>
   <ion-page>
-    <FeedHeader />
-
     <ion-content :fullscreen="true" class="[--background:#0E1F1A]">
+      <!-- Same sticky chrome pattern as Explore (DiscoverPage) -->
+      <div class="z-30 shrink-0 bg-[#0E1F1A] border-b border-white/[0.06] sticky top-0">
+        <FeedHeader :feed-mode="feedMode" @update:feed-mode="setFeedMode" />
+      </div>
+
       <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
         <ion-refresher-content pulling-icon="crescent" refreshing-spinner="crescent" />
       </ion-refresher>
@@ -47,7 +48,13 @@ const handleInfinite = async (event: CustomEvent) => {
         <ion-spinner name="crescent" class="text-sage w-8 h-8" />
       </div>
 
-      <FeedEmpty v-else-if="!loading && items.length === 0" />
+      <FeedEmpty
+        v-else-if="!loading && items.length === 0"
+        :title="feedMode === 'following' ? 'No finds yet' : undefined"
+        :description="feedMode === 'following'
+          ? 'Follow people to see their finds here.'
+          : undefined"
+      />
 
       <div v-else class="flex flex-col gap-4 px-4 pt-4 pb-24">
         <FeedCard
@@ -67,7 +74,5 @@ const handleInfinite = async (event: CustomEvent) => {
         <ion-infinite-scroll-content loading-spinner="crescent" />
       </ion-infinite-scroll>
     </ion-content>
-
-    <FeedFullscreen :image-url="fullscreenImage" @close="closeFullscreen" />
   </ion-page>
 </template>

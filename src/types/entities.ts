@@ -33,6 +33,13 @@ export interface User {
   createdAt: string
 }
 
+export interface FollowUser {
+  id: string
+  username: string
+  displayName: string | null
+  avatarUrl: string | null
+}
+
 export interface Find {
   id: string
   userId: string

@@ -96,6 +96,36 @@ export const getCommunityFeed = async (
   return ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
 }
 
+export const getFollowingFeed = async (
+  viewerUserId: string,
+  cursor?: string,
+): Promise<FeedItemDto[]> => {
+  const { data: followRows, error: followError } = await supabase
+    .from('follows')
+    .select('followed_id')
+    .eq('follower_id', viewerUserId)
+
+  if (followError) throw followError
+
+  const followedIds = [...new Set((followRows ?? []).map((r: { followed_id: string | null }) => r.followed_id).filter(Boolean))] as string[]
+  if (followedIds.length === 0) return []
+
+  let query = supabase
+    .from('finds')
+    .select('id, image_url, caption, location_name, lat, lng, community, created_at, users(id, username, avatar_url), reactions(count)')
+    .in('user_id', followedIds)
+    .order('created_at', { ascending: false })
+    .limit(PAGE_SIZE)
+
+  if (cursor) {
+    query = query.lt('created_at', cursor)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+  return ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
+}
+
 interface PreviewRow {
   image_url: string
 }

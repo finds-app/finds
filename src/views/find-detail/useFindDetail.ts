@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import * as findsService from '@/services/finds.service'
 import * as reactionsService from '@/services/reactions.service'
 import * as savesService from '@/services/saves.service'
-import { buildMapRoute } from '@/constants'
+import { buildMapRoute, pushUserProfile } from '@/constants'
 
 export const useFindDetail = () => {
   const route = useRoute()
@@ -75,7 +75,7 @@ export const useFindDetail = () => {
   }
 
   const goToUser = (userId: string) => {
-    router.push(`/user/${userId}`)
+    pushUserProfile(router, userId, authStore.user?.id)
   }
 
   const goToMap = () => {

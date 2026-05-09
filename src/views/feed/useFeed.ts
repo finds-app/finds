@@ -5,15 +5,15 @@ import type { FeedItemDto } from '@/types'
 import * as findsService from '@/services/finds.service'
 import { useReactions } from '@/composables/useReactions'
 import { useAuthStore } from '@/stores/auth'
-import { buildMapRoute } from '@/constants'
+import { buildMapRoute, pushUserProfile } from '@/constants'
 
 export const useFeed = () => {
+  const feedMode = ref<'forYou' | 'following'>('forYou')
   const items = ref<FeedItemDto[]>([])
   const loading = ref(false)
   const refreshing = ref(false)
   const hasMore = ref(true)
   const error = ref('')
-  const fullscreenImage = ref<string | null>(null)
   const togglingIds = new Set<string>()
 
   const authStore = useAuthStore()
@@ -25,12 +25,21 @@ export const useFeed = () => {
     return enrichWithReactions(data, authStore.user.id)
   }
 
+  const fetchFeedPage = async (cursor?: string): Promise<FeedItemDto[]> => {
+    if (feedMode.value === 'following') {
+      const uid = authStore.user?.id
+      if (!uid) return []
+      return findsService.getFollowingFeed(uid, cursor)
+    }
+    return findsService.getFeed(cursor)
+  }
+
   const load = async () => {
     if (loading.value) return
     loading.value = true
     error.value = ''
     try {
-      const data = await findsService.getFeed()
+      const data = await fetchFeedPage()
       items.value = await enrich(data)
       hasMore.value = data.length >= 20
     } catch (e: unknown) {
@@ -44,7 +53,7 @@ export const useFeed = () => {
     refreshing.value = true
     error.value = ''
     try {
-      const data = await findsService.getFeed()
+      const data = await fetchFeedPage()
       items.value = await enrich(data)
       hasMore.value = data.length >= 20
     } catch (e: unknown) {
@@ -59,7 +68,7 @@ export const useFeed = () => {
     loading.value = true
     try {
       const cursor = items.value[items.value.length - 1].createdAt
-      const data = await findsService.getFeed(cursor)
+      const data = await fetchFeedPage(cursor)
       const enriched = await enrich(data)
       items.value.push(...enriched)
       hasMore.value = data.length >= 20
@@ -68,6 +77,14 @@ export const useFeed = () => {
     } finally {
       loading.value = false
     }
+  }
+
+  const setFeedMode = (mode: 'forYou' | 'following') => {
+    if (feedMode.value === mode) return
+    feedMode.value = mode
+    items.value = []
+    hasMore.value = true
+    void load()
   }
 
   const toggleReaction = async (findId: string) => {
@@ -79,7 +96,7 @@ export const useFeed = () => {
     const { optimisticUpdate, rollback, execute } = createToggle(
       findId,
       authStore.user.id,
-      item.hasReacted
+      item.hasReacted,
     )
 
     optimisticUpdate(item)
@@ -101,7 +118,7 @@ export const useFeed = () => {
     const { optimisticUpdate, rollback, execute } = createSaveToggle(
       findId,
       authStore.user.id,
-      item.hasSaved
+      item.hasSaved,
     )
 
     optimisticUpdate(item)
@@ -119,7 +136,7 @@ export const useFeed = () => {
   }
 
   const goToUser = (userId: string) => {
-    router.push(`/user/${userId}`)
+    pushUserProfile(router, userId, authStore.user?.id)
   }
 
   const goToMap = (lat: number, lng: number, locationName?: string) => {
@@ -130,23 +147,16 @@ export const useFeed = () => {
     router.push(`/community/${communityId}`)
   }
 
-  const openFullscreen = (imageUrl: string) => {
-    fullscreenImage.value = imageUrl
-  }
-
-  const closeFullscreen = () => {
-    fullscreenImage.value = null
-  }
-
   onIonViewDidEnter(load)
 
   return {
+    feedMode,
     items,
     loading,
     refreshing,
     hasMore,
     error,
-    fullscreenImage,
+    setFeedMode,
     refresh,
     loadMore,
     toggleReaction,
@@ -155,7 +165,5 @@ export const useFeed = () => {
     goToUser,
     goToMap,
     goToCommunity,
-    openFullscreen,
-    closeFullscreen,
   }
 }

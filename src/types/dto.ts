@@ -3,12 +3,14 @@ import type {
   FeedItem,
   Find,
   FindDetail,
+  FollowUser,
   MapFind,
   ReactionType,
   User,
 } from './entities'
 
 export type UserDto = User
+export type FollowUserDto = FollowUser
 export type FindDto = Find
 export type FeedItemDto = FeedItem
 export type FindDetailDto = FindDetail
