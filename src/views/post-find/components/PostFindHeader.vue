@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { IonButton, IonButtons, IonHeader, IonSpinner, IonTitle, IonToolbar } from '@ionic/vue'
+import { IonSpinner } from '@ionic/vue'
 
 defineProps<{
   canPost: boolean
@@ -13,22 +13,26 @@ defineEmits<{
 </script>
 
 <template>
-  <ion-header>
-    <ion-toolbar class="[--background:#0E1F1A] [--border-color:rgba(255,255,255,0.08)]">
-      <ion-buttons slot="start">
-        <ion-button class="[--color:#F8F4EF]" @click="$emit('cancel')">Cancel</ion-button>
-      </ion-buttons>
-      <ion-title class="font-display italic text-sage text-lg">finds</ion-title>
-      <ion-buttons slot="end">
-        <ion-button
-          :disabled="!canPost || posting"
-          class="[--color:#52B788] font-medium"
-          @click="$emit('post')"
-        >
-          <ion-spinner v-if="posting" name="crescent" class="w-4 h-4" />
-          <span v-else>Post</span>
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
+  <header class="sticky top-0 z-10 px-5 pt-[env(safe-area-inset-top)] bg-app">
+    <div class="flex items-center justify-between h-14">
+      <button
+        class="text-sm font-body text-white/60 active:text-white/80 border-0 bg-transparent p-0"
+        @click="$emit('cancel')"
+      >
+        Cancel
+      </button>
+
+      <h1 class="text-[15px] font-body font-medium text-white/80">New Find</h1>
+
+      <button
+        :disabled="!canPost || posting"
+        class="text-sm font-body font-semibold border-0 bg-transparent p-0 transition-opacity"
+        :class="canPost && !posting ? 'text-sage' : 'text-sage/30'"
+        @click="$emit('post')"
+      >
+        <ion-spinner v-if="posting" name="crescent" class="w-4 h-4 text-sage" />
+        <span v-else>Share</span>
+      </button>
+    </div>
+  </header>
 </template>

@@ -29,19 +29,20 @@ watch(photoGps, (gps) => {
 
 <template>
   <ion-page>
-    <PostFindHeader
-      :can-post="canPost"
-      :posting="posting"
-      @cancel="router.back()"
-      @post="post"
-    />
-
     <ion-content :fullscreen="true" class="[--background:#0E1F1A]">
-      <div class="flex flex-col">
-        <PostFindImagePicker :image-preview="imagePreview" @pick="pickImage" />
+      <PostFindHeader
+        :can-post="canPost"
+        :posting="posting"
+        @cancel="router.back()"
+        @post="post"
+      />
 
-        <div class="flex flex-col gap-0 px-5 py-4">
-          <PostFindCaptionField v-model="caption" />
+      <PostFindImagePicker :image-preview="imagePreview" @pick="pickImage" />
+
+      <div class="px-5 pt-5 pb-4 flex flex-col gap-0">
+        <PostFindCaptionField v-model="caption" />
+
+        <div class="border-t border-white/[0.06] mt-3">
           <PostFindLocationRow
             :location-name="locationName"
             :gps-loading="gpsLoading"
@@ -51,11 +52,14 @@ watch(photoGps, (gps) => {
             @use-current="detectDeviceLocation"
             @clear="clearLocation"
           />
-          <PostFindCommunityPicker :selected-community="community" @select="toggleCommunity" />
         </div>
 
-        <PostFindError :message="postError" />
+        <div class="border-t border-white/[0.06]">
+          <PostFindCommunityPicker :selected-community="community" @select="toggleCommunity" />
+        </div>
       </div>
+
+      <PostFindError :message="postError" />
 
       <div class="pb-[env(safe-area-inset-bottom,16px)]" />
     </ion-content>

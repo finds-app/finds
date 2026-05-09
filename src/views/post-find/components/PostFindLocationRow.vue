@@ -30,7 +30,6 @@ const query = ref(props.locationName)
 const results = ref<SearchResult[]>([])
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
-// Sync when parent updates the value (EXIF pre-fill)
 watch(
   () => props.locationName,
   (val) => { if (val !== query.value) query.value = val },
@@ -75,9 +74,9 @@ const clearQuery = () => {
 </script>
 
 <template>
-  <div class="border-b border-white/[0.08]">
+  <div>
     <div class="flex items-center gap-3 py-3">
-      <ion-icon :icon="locationOutline" class="text-sage text-lg shrink-0" />
+      <ion-icon :icon="locationOutline" class="text-sage/60 text-lg shrink-0" />
 
       <div class="flex-1 min-w-0">
         <span v-if="gpsLoading" class="text-white/35 text-sm font-body">Locating...</span>
@@ -87,14 +86,14 @@ const clearQuery = () => {
           :value="query"
           type="text"
           placeholder="Add a location..."
-          class="w-full bg-transparent text-white/70 text-sm font-body outline-none border-0 placeholder:text-white/25"
+          class="w-full bg-transparent text-white/70 text-sm font-body outline-none border-0 placeholder:text-white/20"
           @input="onInput"
         />
       </div>
 
       <button
         v-if="query && !gpsLoading"
-        class="shrink-0 p-0 m-0 border-0 bg-transparent text-white/25 active:text-white/50"
+        class="shrink-0 p-0 m-0 border-0 bg-transparent text-white/20 active:text-white/40"
         @click="clearQuery"
       >
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -104,30 +103,24 @@ const clearQuery = () => {
 
       <button
         v-if="!hasLocation && !query && !gpsLoading"
-        class="shrink-0 p-0 m-0 border-0 bg-transparent text-sage/70 active:text-sage"
+        class="shrink-0 p-1 m-0 border-0 bg-transparent text-sage/70"
         @click="emit('use-current')"
       >
-        <ion-icon :icon="navigateOutline" class="text-base" />
+        <ion-icon :icon="navigateOutline" class="text-sm" />
       </button>
     </div>
 
-    <!-- Search results dropdown -->
-    <div v-if="results.length > 0" class="pb-1">
+    <div v-if="results.length > 0" class="pb-2 pl-8">
       <button
         v-for="(result, i) in results"
         :key="result.id"
-        class="w-full flex items-center gap-3 px-0 py-2.5 text-left border-0 bg-transparent transition-opacity active:opacity-60"
-        :class="{ 'border-t border-white/[0.06]': i > 0 }"
+        class="w-full flex items-center gap-3 px-0 py-2 text-left border-0 bg-transparent transition-opacity active:opacity-60"
+        :class="{ 'border-t border-white/[0.05]': i > 0 }"
         @mousedown.prevent="selectResult(result)"
       >
-        <div class="w-5 h-5 shrink-0 flex items-center justify-center">
-          <svg class="w-3 h-3 text-sage/50" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-          </svg>
-        </div>
         <div class="min-w-0">
           <span class="text-white/70 text-sm font-body block truncate">{{ result.name }}</span>
-          <span class="text-white/30 text-[11px] font-body block truncate">{{ result.region }}</span>
+          <span class="text-white/25 text-[11px] font-body block truncate">{{ result.region }}</span>
         </div>
       </button>
     </div>

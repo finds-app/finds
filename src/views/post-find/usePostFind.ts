@@ -23,7 +23,7 @@ export const usePostFind = ({ imageBlob, locationName, lat, lng }: UsePostFindOp
   const posting = ref(false)
   const postError = ref('')
 
-  const canPost = computed(() => !!imageBlob.value && !posting.value)
+  const canPost = computed(() => !!imageBlob.value && lat.value !== null && lng.value !== null && !posting.value)
 
   const toggleCommunity = (id: CommunityId) => {
     community.value = community.value === id ? null : id

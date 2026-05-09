@@ -12,18 +12,18 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="pt-4">
-    <p class="text-white/35 text-xs font-medium uppercase tracking-widest mb-3">Community</p>
+  <div class="pt-2">
+    <p class="text-white/30 text-[11px] font-body font-medium uppercase tracking-wider mb-2.5">Community</p>
     <div class="flex flex-wrap gap-2">
       <button
         v-for="community in COMMUNITIES"
         :key="community.id"
-        class="px-3 py-1.5 rounded-full text-xs font-body border transition-all"
+        class="px-3.5 py-1.5 rounded-full text-xs font-body border transition-all"
         :class="selectedCommunity === community.id
-          ? 'border-transparent text-app font-medium'
-          : 'border-white/15 text-white/45 bg-transparent'"
+          ? 'border-transparent text-app font-medium shadow-sm'
+          : 'border-white/10 text-white/40 bg-transparent active:border-white/20'"
         :style="selectedCommunity === community.id
-          ? { background: community.color, borderColor: community.color }
+          ? { background: community.color }
           : {}"
         @click="$emit('select', community.id)"
       >

@@ -13,10 +13,10 @@ defineEmits<{
 <template>
   <ion-textarea
     :model-value="modelValue"
-    placeholder="What did you notice?"
+    placeholder="What did you find?"
     :auto-grow="true"
-    :rows="3"
-    class="[--background:transparent] [--color:#F8F4EF] [--placeholder-color:rgba(255,255,255,0.25)] [--padding-start:0] text-base font-body border-b border-white/[0.08] pb-4 mb-4"
+    :rows="2"
+    class="[--background:transparent] [--color:#F8F4EF] [--placeholder-color:rgba(255,255,255,0.25)] [--padding-start:0] [--padding-end:0] text-[15px] font-body"
     @ion-input="$emit('update:modelValue', String($event.detail.value ?? ''))"
   />
 </template>
