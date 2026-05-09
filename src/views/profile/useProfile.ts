@@ -17,9 +17,12 @@ export const useProfile = () => {
   const finds = ref<FindDto[]>([])
   const stats = ref<ProfileStatsDto>({ findsCount: 0, followersCount: 0, followingCount: 0 })
   const loading = ref(true)
+  const viewMode = ref<'grid' | 'map'>('grid')
   const editingBio = ref(false)
   const bioDraft = ref('')
   const savingBio = ref(false)
+
+  const mapFinds = computed(() => finds.value.filter((f) => f.lat && f.lng))
 
   const isOwnProfile = computed(() => {
     const paramId = route.params.userId as string | undefined
@@ -103,8 +106,10 @@ export const useProfile = () => {
   return {
     profile,
     finds,
+    mapFinds,
     stats,
     loading,
+    viewMode,
     isOwnProfile,
     editingBio,
     bioDraft,

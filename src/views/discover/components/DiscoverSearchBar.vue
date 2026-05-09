@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
-
 const props = defineProps<{
   initialQuery?: string | null
 }>()
@@ -10,6 +8,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   'fly-to': [lng: number, lat: number]
 }>()
+
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
 
 interface SearchResult {
   id: string
