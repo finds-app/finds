@@ -1,10 +1,12 @@
 import { ref, watch, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onIonViewDidEnter } from '@ionic/vue'
+import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { Geolocation } from '@capacitor/geolocation'
 import { Capacitor } from '@capacitor/core'
 import type { Map as MapboxMap } from 'mapbox-gl'
-import type { MapFindDto } from '@/types'
-import { getFindsForMap } from '@/services/finds.service'
+import type { CommunityId, CommunityPreviewDto, MapFindDto } from '@/types'
+import { getCommunityPreviews, getFindsForMap } from '@/services/finds.service'
 
 let mapInstance: MapboxMap | null = null
 
@@ -15,6 +17,10 @@ export const setMapInstance = (map: MapboxMap) => {
 export const useDiscover = () => {
   const route = useRoute()
   const router = useRouter()
+
+  const viewMode = ref<'communities' | 'map'>('communities')
+  const communityPreviews = ref<CommunityPreviewDto[]>([])
+  const previewsLoading = ref(false)
 
   const finds = ref<MapFindDto[]>([])
   const selectedFind = ref<MapFindDto | null>(null)
@@ -29,10 +35,21 @@ export const useDiscover = () => {
     loading.value = true
     try {
       finds.value = await getFindsForMap()
-    } catch (e) {
-      console.error('Failed to load map finds', e)
+    } catch {
+      // Failed to load map finds — leave markers empty
     } finally {
       loading.value = false
+    }
+  }
+
+  const loadCommunityPreviews = async () => {
+    previewsLoading.value = true
+    try {
+      communityPreviews.value = await getCommunityPreviews()
+    } catch {
+      // Failed to load previews — cards fall back to empty mosaic
+    } finally {
+      previewsLoading.value = false
     }
   }
 
@@ -45,12 +62,17 @@ export const useDiscover = () => {
         duration: 1200,
       })
     }
-    // Reset to null first so the search bar watch always sees a fresh value,
-    // even when the same location is tapped again after manually clearing the input
     incomingSearchQuery.value = null
     if (location) {
-      nextTick(() => { incomingSearchQuery.value = String(location) })
+      nextTick(() => {
+        incomingSearchQuery.value = String(location)
+      })
     }
+  }
+
+  const syncMapRouteToViewMode = () => {
+    const { lat, lng } = route.query
+    if (lat && lng) viewMode.value = 'map'
   }
 
   const onMapReady = () => {
@@ -59,10 +81,13 @@ export const useDiscover = () => {
     applyRouteQuery()
   }
 
-  // React to route query changes when map is already loaded (subsequent tab visits)
   watch(
     () => route.query,
-    () => { if (mapReady.value) applyRouteQuery() },
+    () => {
+      syncMapRouteToViewMode()
+      if (mapReady.value) applyRouteQuery()
+    },
+    { immediate: true },
   )
 
   const selectFind = (find: MapFindDto) => {
@@ -78,13 +103,28 @@ export const useDiscover = () => {
     router.push(`/find/${selectedFind.value.id}`)
   }
 
+  const goToCommunityFeed = (communityId: CommunityId) => {
+    router.push(`/community/${communityId}`)
+  }
+
+  const setViewMode = (mode: 'communities' | 'map') => {
+    viewMode.value = mode
+    if (mode === 'communities') void loadCommunityPreviews()
+  }
+
+  const getPreview = (id: CommunityId): CommunityPreviewDto =>
+    communityPreviews.value.find((p) => p.communityId === id) ?? {
+      communityId: id,
+      findCount: 0,
+      previewImages: [],
+    }
+
   const flyToUser = async () => {
     if (locating.value) return
     locating.value = true
     locationError.value = false
 
     try {
-      // requestPermissions() is native-only — web uses browser prompt via getCurrentPosition
       if (Capacitor.isNativePlatform()) {
         const perm = await Geolocation.requestPermissions()
         if (perm.location !== 'granted' && perm.coarseLocation !== 'granted') {
@@ -119,7 +159,14 @@ export const useDiscover = () => {
     mapInstance.flyTo({ center: [lng, lat], zoom, duration: 1200 })
   }
 
+  onIonViewDidEnter(() => {
+    if (viewMode.value === 'communities') void loadCommunityPreviews()
+  })
+
   return {
+    viewMode,
+    communityPreviews,
+    previewsLoading,
     finds,
     selectedFind,
     userLocation,
@@ -132,6 +179,9 @@ export const useDiscover = () => {
     selectFind,
     clearSelection,
     goToFindDetail,
+    goToCommunityFeed,
+    setViewMode,
+    getPreview,
     flyToUser,
     flyTo,
   }

@@ -37,69 +37,90 @@ const handleRefresh = async (event: CustomEvent) => {
 
 <template>
   <ion-page>
-    <!-- Map mode: full-screen map with floating toggle -->
     <ion-content
-      v-if="!loading && profile && viewMode === 'map'"
       :fullscreen="true"
-      :scroll-y="false"
-      class="profile-map-content"
+      :scroll-y="viewMode === 'grid'"
+      :class="[
+        '[--background:#0E1F1A]',
+        viewMode === 'map' ? 'profile-map-layout' : '',
+      ]"
     >
-      <ProfileMap :finds="mapFinds" @select-find="goToFind" />
-
-      <div class="absolute inset-x-0 z-10 flex justify-center pointer-events-none" style="top: max(env(safe-area-inset-top, 16px), 16px);">
-        <ProfileViewToggle :view-mode="viewMode" class="pointer-events-auto" @change="viewMode = $event" />
-      </div>
-    </ion-content>
-
-    <!-- Grid mode: scrollable profile layout -->
-    <ion-content v-else :fullscreen="true" class="[--background:#0E1F1A]">
-      <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
-        <ion-refresher-content pulling-icon="crescent" refreshing-spinner="crescent" />
-      </ion-refresher>
-
-      <ProfileSkeleton v-if="loading" />
-
-      <template v-else-if="profile">
-        <ProfileHeader
-          :profile="profile"
-          :is-own-profile="isOwnProfile"
-          :editing-bio="editingBio"
-          :bio-draft="bioDraft"
-          :saving-bio="savingBio"
-          @start-edit-bio="startEditBio"
-          @cancel-edit-bio="cancelEditBio"
-          @save-bio="saveBio"
-          @update:bio-draft="bioDraft = $event"
-        />
-
-        <ProfileStats :stats="stats" />
-
-
-        <div class="flex justify-center pb-4">
-          <ProfileViewToggle
-            v-if="finds.length > 0"
-            :view-mode="viewMode"
-            @change="viewMode = $event"
-          />
+      <!-- Toggle row: same position as Explore header -->
+      <div
+        v-if="!loading && profile && finds.length > 0"
+        :class="[
+          'z-30 shrink-0 bg-[#0E1F1A] border-b border-white/[0.06] px-2 pb-2 pt-[env(safe-area-inset-top,0px)]',
+          viewMode === 'map' ? 'profile-map-chrome' : 'sticky top-0',
+        ]"
+      >
+        <div class="flex items-center justify-between gap-3 min-h-[48px] pt-2">
+          <h1 class="font-display font-bold italic text-cream text-xl shrink-0 pl-1 m-0">
+            Profile
+          </h1>
+          <ProfileViewToggle :view-mode="viewMode" @change="viewMode = $event" />
         </div>
+      </div>
 
-        <ProfileGrid v-if="finds.length > 0" :finds="finds" @tap-find="goToFind" />
-        <ProfileEmpty v-else :is-own-profile="isOwnProfile" />
+      <!-- Grid mode -->
+      <template v-if="viewMode === 'grid'">
+        <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
+          <ion-refresher-content pulling-icon="crescent" refreshing-spinner="crescent" />
+        </ion-refresher>
 
-        <SignOutButton v-if="isOwnProfile" @sign-out="signOut" />
+        <ProfileSkeleton v-if="loading" />
+
+        <template v-else-if="profile">
+          <ProfileHeader
+            :profile="profile"
+            :is-own-profile="isOwnProfile"
+            :editing-bio="editingBio"
+            :bio-draft="bioDraft"
+            :saving-bio="savingBio"
+            @start-edit-bio="startEditBio"
+            @cancel-edit-bio="cancelEditBio"
+            @save-bio="saveBio"
+            @update:bio-draft="bioDraft = $event"
+          />
+
+          <ProfileStats :stats="stats" />
+
+          <ProfileGrid v-if="finds.length > 0" :finds="finds" @tap-find="goToFind" />
+          <ProfileEmpty v-else :is-own-profile="isOwnProfile" />
+
+          <SignOutButton v-if="isOwnProfile" @sign-out="signOut" />
+        </template>
       </template>
+
+      <!-- Map mode -->
+      <div v-else class="profile-map-stage">
+        <ProfileMap :finds="mapFinds" @select-find="goToFind" />
+      </div>
     </ion-content>
   </ion-page>
 </template>
 
 <style>
-.profile-map-content {
-  --background: #0E1F1A;
+.profile-map-layout {
+  --padding-bottom: 0;
+  --padding-top: 0;
+  --padding-start: 0;
+  --padding-end: 0;
 }
 
-.profile-map-content::part(scroll) {
-  overflow: hidden;
+.profile-map-layout::part(scroll) {
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  touch-action: none;
+  overflow: hidden;
+}
+
+.profile-map-chrome {
+  flex: 0 0 auto;
+}
+
+.profile-map-stage {
+  flex: 1 1 0%;
+  position: relative;
+  overflow: hidden;
 }
 </style>

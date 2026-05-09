@@ -1,5 +1,15 @@
 import { supabase } from './supabase'
-import type { CreateFindPayload, FeedItemDto, FindDetailDto, FindDto, FindRow, MapFindDto } from '@/types'
+import type {
+  CommunityId,
+  CommunityPreviewDto,
+  CreateFindPayload,
+  FeedItemDto,
+  FindDetailDto,
+  FindDto,
+  FindRow,
+  MapFindDto,
+} from '@/types'
+import { COMMUNITIES } from '@/constants'
 
 const PAGE_SIZE = 20
 
@@ -65,6 +75,58 @@ export const getFeed = async (cursor?: string): Promise<FeedItemDto[]> => {
   if (error) throw error
   return ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
 }
+
+export const getCommunityFeed = async (
+  communityId: CommunityId,
+  cursor?: string,
+): Promise<FeedItemDto[]> => {
+  let query = supabase
+    .from('finds')
+    .select('id, image_url, caption, location_name, lat, lng, community, created_at, users(id, username, avatar_url), reactions(count)')
+    .eq('community', communityId)
+    .order('created_at', { ascending: false })
+    .limit(PAGE_SIZE)
+
+  if (cursor) {
+    query = query.lt('created_at', cursor)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+  return ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
+}
+
+interface PreviewRow {
+  image_url: string
+}
+
+const fetchCommunityPreview = async (communityId: CommunityId): Promise<CommunityPreviewDto> => {
+  const [countResult, previewResult] = await Promise.all([
+    supabase
+      .from('finds')
+      .select('*', { count: 'exact', head: true })
+      .eq('community', communityId),
+    supabase
+      .from('finds')
+      .select('image_url')
+      .eq('community', communityId)
+      .order('created_at', { ascending: false })
+      .limit(4),
+  ])
+
+  if (countResult.error) throw countResult.error
+  if (previewResult.error) throw previewResult.error
+
+  const rows = (previewResult.data ?? []) as PreviewRow[]
+  return {
+    communityId,
+    findCount: countResult.count ?? 0,
+    previewImages: rows.map((r) => r.image_url),
+  }
+}
+
+export const getCommunityPreviews = async (): Promise<CommunityPreviewDto[]> =>
+  Promise.all(COMMUNITIES.map((c) => fetchCommunityPreview(c.id)))
 
 export const createFind = async (payload: CreateFindPayload): Promise<FindDto> => {
   const { data, error } = await supabase

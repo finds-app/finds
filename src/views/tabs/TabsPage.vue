@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue'
-import { homeOutline, mapOutline, addOutline, ribbonOutline, personOutline } from 'ionicons/icons'
+import { homeOutline, addOutline, ribbonOutline, personOutline, searchOutline } from 'ionicons/icons'
 import { useRouter } from 'vue-router'
 import { ROUTES } from '@/constants'
 
@@ -19,7 +19,7 @@ const router = useRouter()
         </ion-tab-button>
 
         <ion-tab-button tab="tab2" :href="ROUTES.discover" class="[--color:rgba(255,255,255,0.35)] [--color-selected:#52B788]">
-          <ion-icon :icon="mapOutline" />
+          <ion-icon :icon="searchOutline" />
           <ion-label>Explore</ion-label>
         </ion-tab-button>
 

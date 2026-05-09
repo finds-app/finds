@@ -11,6 +11,7 @@ export interface Community {
   id: CommunityId
   label: string
   color: string
+  description: string
 }
 
 export interface MapFind {

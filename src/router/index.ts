@@ -36,6 +36,10 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/find-detail/FindDetailPage.vue'),
   },
   {
+    path: ROUTES.communityFeed,
+    component: () => import('@/views/community-feed/CommunityFeedPage.vue'),
+  },
+  {
     path: '/tabs/',
     component: TabsPage,
     children: [

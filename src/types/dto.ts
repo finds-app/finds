@@ -53,3 +53,9 @@ export interface UploadedFileDto {
   path: string
   publicUrl: string
 }
+
+export interface CommunityPreviewDto {
+  communityId: CommunityId
+  findCount: number
+  previewImages: string[]
+}

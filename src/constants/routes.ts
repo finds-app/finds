@@ -9,6 +9,7 @@ export const ROUTES = {
   profile: '/tabs/tab3',
   userProfile: '/user/:userId',
   findDetail: '/find/:findId',
+  communityFeed: '/community/:communityId',
 } as const
 
 export const buildMapRoute = (lat: number, lng: number, locationName?: string | null): string => {
