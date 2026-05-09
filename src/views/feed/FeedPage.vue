@@ -17,6 +17,7 @@ const {
   toggleSave,
   goToFind,
   goToUser,
+  goToMap,
   openFullscreen,
   closeFullscreen,
 } = useFeed()
@@ -56,6 +57,7 @@ const handleInfinite = async (event: CustomEvent) => {
           @toggle-reaction="toggleReaction"
           @toggle-save="toggleSave"
           @tap-user="goToUser"
+          @tap-location="(lat, lng, loc) => goToMap(lat, lng, loc)"
         />
       </div>
 

@@ -11,3 +11,9 @@ export const COMMUNITIES: Community[] = [
 ]
 
 export const COMMUNITY_COLORS = COMMUNITIES.map((community) => community.color)
+
+export const getCommunityColor = (id: string | null): string =>
+  COMMUNITIES.find((c) => c.id === id)?.color ?? '#52B788'
+
+export const getCommunityLabel = (id: string | null): string | null =>
+  COMMUNITIES.find((c) => c.id === id)?.label ?? null

@@ -11,16 +11,23 @@ const props = defineProps<{
   item: FeedItemDto
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   tapImage: [imageUrl: string]
   toggleReaction: [findId: string]
   toggleSave: [findId: string]
   tapUser: [userId: string]
+  tapLocation: [lat: number, lng: number, locationName: string]
 }>()
 
 const communityMeta = props.item.community
   ? COMMUNITIES.find((c) => c.id === props.item.community)
   : null
+
+const onLocationTap = (e: Event) => {
+  if (!props.item.lat || !props.item.lng) return
+  ;(e.currentTarget as HTMLElement).blur()
+  emit('tapLocation', props.item.lat, props.item.lng, props.item.locationName!)
+}
 </script>
 
 <template>
@@ -54,10 +61,15 @@ const communityMeta = props.item.community
 
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3 flex-wrap">
-          <div v-if="item.locationName" class="flex items-center gap-1">
-            <ion-icon :icon="locationOutline" class="text-sage text-sm" />
-            <span class="text-white/40 text-xs font-body">{{ item.locationName }}</span>
-          </div>
+          <button
+            v-if="item.locationName"
+            class="flex items-center gap-1.5 bg-white/[0.06] rounded-full px-2.5 py-1 border-0 m-0 transition-opacity"
+            :class="item.lat && item.lng ? 'active:opacity-60' : 'cursor-default'"
+            @click="onLocationTap"
+          >
+            <ion-icon :icon="locationOutline" class="text-sage text-xs" />
+            <span class="text-white/55 text-xs font-body">{{ item.locationName }}</span>
+          </button>
 
           <span
             v-if="communityMeta"

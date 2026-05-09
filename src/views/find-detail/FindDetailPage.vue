@@ -12,6 +12,7 @@ const {
   toggleReaction,
   toggleSave,
   goToUser,
+  goToMap,
   goBack,
 } = useFindDetail()
 </script>
@@ -33,6 +34,7 @@ const {
           @toggle-reaction="toggleReaction"
           @toggle-save="toggleSave"
           @tap-user="goToUser"
+          @tap-location="goToMap"
         />
       </template>
 

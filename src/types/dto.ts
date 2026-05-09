@@ -3,6 +3,7 @@ import type {
   FeedItem,
   Find,
   FindDetail,
+  MapFind,
   ReactionType,
   User,
 } from './entities'
@@ -11,6 +12,7 @@ export type UserDto = User
 export type FindDto = Find
 export type FeedItemDto = FeedItem
 export type FindDetailDto = FindDetail
+export type MapFindDto = MapFind
 
 export interface CreateUserProfilePayload {
   userId: string

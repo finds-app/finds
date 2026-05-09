@@ -5,6 +5,7 @@ import type { FeedItemDto } from '@/types'
 import * as findsService from '@/services/finds.service'
 import { useReactions } from '@/composables/useReactions'
 import { useAuthStore } from '@/stores/auth'
+import { buildMapRoute } from '@/constants'
 
 export const useFeed = () => {
   const items = ref<FeedItemDto[]>([])
@@ -121,6 +122,10 @@ export const useFeed = () => {
     router.push(`/user/${userId}`)
   }
 
+  const goToMap = (lat: number, lng: number, locationName?: string) => {
+    router.push(buildMapRoute(lat, lng, locationName))
+  }
+
   const openFullscreen = (imageUrl: string) => {
     fullscreenImage.value = imageUrl
   }
@@ -144,6 +149,7 @@ export const useFeed = () => {
     toggleSave,
     goToFind,
     goToUser,
+    goToMap,
     openFullscreen,
     closeFullscreen,
   }

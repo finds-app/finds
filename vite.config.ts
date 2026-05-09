@@ -9,7 +9,11 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [
     vue(),
-    legacy()
+    legacy({
+      // Capacitor runs in modern WKWebView/Chrome WebView — no need for ES5 legacy chunks
+      renderLegacyChunks: false,
+      modernPolyfills: true,
+    })
   ],
   resolve: {
     alias: {

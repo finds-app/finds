@@ -13,6 +13,16 @@ export interface Community {
   color: string
 }
 
+export interface MapFind {
+  id: string
+  lat: number
+  lng: number
+  imageUrl: string
+  community: CommunityId | null
+  createdAt: string
+  user: { id: string; username: string }
+}
+
 export interface User {
   id: string
   username: string
@@ -41,6 +51,8 @@ export interface FeedItem {
   imageUrl: string
   caption: string | null
   locationName: string | null
+  lat: number | null
+  lng: number | null
   community: CommunityId | null
   createdAt: string
   reactionCount: number

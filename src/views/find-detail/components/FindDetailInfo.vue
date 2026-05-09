@@ -15,6 +15,7 @@ defineEmits<{
   toggleReaction: []
   toggleSave: []
   tapUser: [userId: string]
+  tapLocation: []
 }>()
 
 const communityMeta = props.find.community
@@ -63,10 +64,15 @@ const communityMeta = props.find.community
 
     <!-- Location + Community -->
     <div class="flex items-center gap-3 flex-wrap">
-      <div v-if="find.locationName" class="flex items-center gap-1.5 bg-white/[0.05] rounded-full px-3 py-1.5">
+      <button
+        v-if="find.locationName"
+        class="flex items-center gap-1.5 bg-white/[0.05] rounded-full px-3 py-1.5 border-0 m-0 active:opacity-60 transition-opacity"
+        :class="find.lat && find.lng ? 'cursor-pointer' : 'cursor-default'"
+        @click="find.lat && find.lng ? $emit('tapLocation') : undefined"
+      >
         <ion-icon :icon="locationOutline" class="text-sage text-sm" />
         <span class="text-white/50 text-xs font-body">{{ find.locationName }}</span>
-      </div>
+      </button>
 
       <span
         v-if="communityMeta"

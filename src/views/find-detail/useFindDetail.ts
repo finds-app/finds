@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import * as findsService from '@/services/finds.service'
 import * as reactionsService from '@/services/reactions.service'
 import * as savesService from '@/services/saves.service'
+import { buildMapRoute } from '@/constants'
 
 export const useFindDetail = () => {
   const route = useRoute()
@@ -77,6 +78,11 @@ export const useFindDetail = () => {
     router.push(`/user/${userId}`)
   }
 
+  const goToMap = () => {
+    if (!find.value?.lat || !find.value?.lng) return
+    router.push(buildMapRoute(find.value.lat, find.value.lng, find.value.locationName))
+  }
+
   const goBack = () => {
     router.back()
   }
@@ -89,6 +95,7 @@ export const useFindDetail = () => {
     toggleReaction,
     toggleSave,
     goToUser,
+    goToMap,
     goBack,
   }
 }
