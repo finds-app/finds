@@ -147,6 +147,7 @@ onUnmounted(() => {
   userMarker?.remove()
   map?.remove()
   map = null
+  setMapInstance(null)
 })
 
 watch(

@@ -8,7 +8,7 @@ import DiscoverCommunityCard from './components/DiscoverCommunityCard.vue'
 import DiscoverMap from './components/DiscoverMap.vue'
 import DiscoverPreviewSheet from './components/DiscoverPreviewSheet.vue'
 import DiscoverNearMe from './components/DiscoverNearMe.vue'
-import DiscoverSearchBar from './components/DiscoverSearchBar.vue'
+import DiscoverUnifiedSearch from './components/DiscoverUnifiedSearch.vue'
 
 const {
   viewMode,
@@ -29,12 +29,16 @@ const {
   setViewMode,
   getPreview,
   flyToUser,
-  flyTo,
+  switchToMapAndFly,
 } = useDiscover()
 
 const handleSelectFind = (find: MapFindDto | null) => {
   if (find) selectFind(find)
   else clearSelection()
+}
+
+const onSelectPlace = (lng: number, lat: number, zoom?: number) => {
+  switchToMapAndFly(lng, lat, zoom ?? 13)
 }
 </script>
 
@@ -48,18 +52,18 @@ const handleSelectFind = (find: MapFindDto | null) => {
         viewMode === 'map' ? 'discover-map-layout' : '',
       ]"
     >
-      <!-- Shared chrome: title + Communities | Map toggle; search bar only in map mode -->
       <div
         :class="[
           'z-30 shrink-0 bg-[#0E1F1A] border-b border-white/[0.06]',
           viewMode === 'map' ? 'discover-map-chrome' : 'sticky top-0',
         ]"
       >
-        <DiscoverHeader :view-mode="viewMode" @update:view-mode="setViewMode" />
+        <DiscoverUnifiedSearch
+          :initial-query="incomingSearchQuery"
+          @select-place="onSelectPlace"
+        />
 
-        <div v-if="viewMode === 'map'" class="px-4 pb-3 pt-1 pointer-events-auto">
-          <DiscoverSearchBar :initial-query="incomingSearchQuery" @fly-to="flyTo" />
-        </div>
+        <DiscoverHeader :view-mode="viewMode" @update:view-mode="setViewMode" />
       </div>
 
       <!-- Communities -->

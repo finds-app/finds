@@ -10,7 +10,7 @@ import { getCommunityPreviews, getFindsForMap } from '@/services/finds.service'
 
 let mapInstance: MapboxMap | null = null
 
-export const setMapInstance = (map: MapboxMap) => {
+export const setMapInstance = (map: MapboxMap | null) => {
   mapInstance = map
 }
 
@@ -78,7 +78,14 @@ export const useDiscover = () => {
   const onMapReady = () => {
     mapReady.value = true
     loadFinds()
-    applyRouteQuery()
+
+    if (pendingFly && mapInstance) {
+      const { lng, lat, zoom } = pendingFly
+      pendingFly = null
+      mapInstance.flyTo({ center: [lng, lat], zoom, duration: 1200 })
+    } else {
+      applyRouteQuery()
+    }
   }
 
   watch(
@@ -109,7 +116,10 @@ export const useDiscover = () => {
 
   const setViewMode = (mode: 'communities' | 'map') => {
     viewMode.value = mode
-    if (mode === 'communities') void loadCommunityPreviews()
+    if (mode === 'communities') {
+      mapReady.value = false
+      void loadCommunityPreviews()
+    }
   }
 
   const getPreview = (id: CommunityId): CommunityPreviewDto =>
@@ -159,6 +169,19 @@ export const useDiscover = () => {
     mapInstance.flyTo({ center: [lng, lat], zoom, duration: 1200 })
   }
 
+  let pendingFly: { lng: number; lat: number; zoom: number } | null = null
+
+  /** Switch to map tab and fly to coordinates (e.g. unified search place pick). */
+  const switchToMapAndFly = (lng: number, lat: number, zoom = 13) => {
+    if (viewMode.value === 'map' && mapInstance) {
+      mapInstance.flyTo({ center: [lng, lat], zoom, duration: 1200 })
+      return
+    }
+
+    pendingFly = { lng, lat, zoom }
+    viewMode.value = 'map'
+  }
+
   onIonViewDidEnter(() => {
     if (viewMode.value === 'communities') void loadCommunityPreviews()
   })
@@ -184,5 +207,6 @@ export const useDiscover = () => {
     getPreview,
     flyToUser,
     flyTo,
+    switchToMapAndFly,
   }
 }
