@@ -11,6 +11,7 @@ import type {
 } from '@/types'
 import { COMMUNITIES } from '@/constants'
 import * as badgesService from './badges.service'
+import * as tagsService from './tags.service'
 
 const PAGE_SIZE = 20
 
@@ -30,6 +31,7 @@ const mapFindRow = (row: FindRow): FindDto => ({
   lng: nullableNumber(row.lng),
   community: row.community,
   badges: parseBadges(row.badges),
+  tags: [],
   createdAt: row.created_at,
 })
 
@@ -56,6 +58,7 @@ const mapFeedRow = (row: FeedRowWithUser): FeedItemDto => ({
   lng: nullableNumber(row.lng),
   community: row.community as FeedItemDto['community'],
   badges: parseBadges(row.badges),
+  tags: [],
   createdAt: row.created_at,
   reactionCount: row.reactions?.[0]?.count ?? 0,
   hasReacted: false,
@@ -66,6 +69,12 @@ const mapFeedRow = (row: FeedRowWithUser): FeedItemDto => ({
     avatarUrl: row.users.avatar_url,
   },
 })
+
+const mergeTagsIntoFeedItems = async (items: FeedItemDto[]): Promise<FeedItemDto[]> => {
+  if (items.length === 0) return items
+  const tagMap = await tagsService.getTagsByFindIds(items.map((i) => i.id))
+  return items.map((item) => ({ ...item, tags: tagMap.get(item.id) ?? [] }))
+}
 
 const mergeTrendingIntoFeedItems = async (items: FeedItemDto[]): Promise<FeedItemDto[]> => {
   if (items.length === 0) return items
@@ -96,7 +105,8 @@ export const getFeed = async (cursor?: string): Promise<FeedItemDto[]> => {
   const { data, error } = await query
   if (error) throw error
   const mapped = ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
-  return mergeTrendingIntoFeedItems(mapped)
+  const withTags = await mergeTagsIntoFeedItems(mapped)
+  return mergeTrendingIntoFeedItems(withTags)
 }
 
 export const getCommunityFeed = async (
@@ -119,7 +129,32 @@ export const getCommunityFeed = async (
   const { data, error } = await query
   if (error) throw error
   const mapped = ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
-  return mergeTrendingIntoFeedItems(mapped)
+  const withTags = await mergeTagsIntoFeedItems(mapped)
+  return mergeTrendingIntoFeedItems(withTags)
+}
+
+export const getTagFeed = async (rawTag: string, cursor?: string): Promise<FeedItemDto[]> => {
+  const tag = tagsService.normalizeTag(rawTag)
+  if (!tag) return []
+
+  let query = supabase
+    .from('finds')
+    .select(
+      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count), tags!inner(tag)',
+    )
+    .eq('tags.tag', tag)
+    .order('created_at', { ascending: false })
+    .limit(PAGE_SIZE)
+
+  if (cursor) {
+    query = query.lt('created_at', cursor)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+  const mapped = ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
+  const withTags = await mergeTagsIntoFeedItems(mapped)
+  return mergeTrendingIntoFeedItems(withTags)
 }
 
 export const getFollowingFeed = async (
@@ -152,7 +187,8 @@ export const getFollowingFeed = async (
   const { data, error } = await query
   if (error) throw error
   const mapped = ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
-  return mergeTrendingIntoFeedItems(mapped)
+  const withTags = await mergeTagsIntoFeedItems(mapped)
+  return mergeTrendingIntoFeedItems(withTags)
 }
 
 interface PreviewRow {
@@ -216,7 +252,17 @@ export const createFind = async (payload: CreateFindPayload): Promise<FindDto> =
   const { error: badgeError } = await supabase.from('finds').update({ badges: staticBadges }).eq('id', row.id)
   if (badgeError) throw badgeError
 
-  return mapFindRow({ ...row, badges: staticBadges } as FindRow)
+  try {
+    await tagsService.insertTagsForFind(row.id, payload.userId, payload.tags ?? [])
+  } catch {
+    /* find still created; apply tags migration / RLS if insert fails */
+  }
+
+  const tagMap = await tagsService.getTagsByFindIds([row.id])
+  return {
+    ...mapFindRow({ ...row, badges: staticBadges } as FindRow),
+    tags: tagMap.get(row.id) ?? [],
+  }
 }
 
 interface DetailRowWithUser {
@@ -253,6 +299,9 @@ export const getFindDetail = async (findId: string): Promise<FindDetailDto | nul
     badges.push('trending')
   }
 
+  const tagMap = await tagsService.getTagsByFindIds([row.id])
+  const tags = tagMap.get(row.id) ?? []
+
   return {
     id: row.id,
     imageUrl: row.image_url,
@@ -262,6 +311,7 @@ export const getFindDetail = async (findId: string): Promise<FindDetailDto | nul
     lng: nullableNumber(row.lng),
     community: row.community as FindDetailDto['community'],
     badges,
+    tags,
     createdAt: row.created_at,
     reactionCount: row.reactions?.[0]?.count ?? 0,
     hasReacted: false,
@@ -314,5 +364,7 @@ export const getFindsByUser = async (userId: string): Promise<FindDto[]> => {
     .order('created_at', { ascending: false })
 
   if (error) throw error
-  return ((data ?? []) as FindRow[]).map(mapFindRow)
+  const rows = ((data ?? []) as FindRow[]).map((r) => mapFindRow(r))
+  const tagMap = await tagsService.getTagsByFindIds(rows.map((r) => r.id))
+  return rows.map((r) => ({ ...r, tags: tagMap.get(r.id) ?? [] }))
 }

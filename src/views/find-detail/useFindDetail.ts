@@ -6,7 +6,7 @@ import * as findsService from '@/services/finds.service'
 import * as reactionsService from '@/services/reactions.service'
 import * as savesService from '@/services/saves.service'
 import * as achievementsService from '@/services/achievements.service'
-import { buildMapRoute, pushUserProfile } from '@/constants'
+import { buildMapRoute, buildTagRoute, pushUserProfile } from '@/constants'
 import { useAchievementCelebration } from '@/composables/useAchievementCelebration'
 
 export const useFindDetail = () => {
@@ -97,6 +97,10 @@ export const useFindDetail = () => {
     router.push(`/community/${communityId}`)
   }
 
+  const goToTag = (tag: string) => {
+    router.push(buildTagRoute(tag))
+  }
+
   const goBack = () => {
     router.back()
   }
@@ -111,6 +115,7 @@ export const useFindDetail = () => {
     goToUser,
     goToMap,
     goToCommunity,
+    goToTag,
     goBack,
   }
 }

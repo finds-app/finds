@@ -8,14 +8,14 @@ import {
   IonInfiniteScrollContent,
   IonSpinner,
 } from '@ionic/vue'
-import { useCommunityFeed } from './useCommunityFeed'
-import CommunityFeedHeader from './components/CommunityFeedHeader.vue'
+import { useTagFeed } from './useTagFeed'
+import TagFeedHeader from './components/TagFeedHeader.vue'
 import FeedCard from '@/views/feed/components/FeedCard.vue'
 import FeedEmpty from '@/views/feed/components/FeedEmpty.vue'
 
 const {
-  community,
-  invalidCommunity,
+  tagSlug,
+  invalidTag,
   items,
   loading,
   hasMore,
@@ -29,7 +29,7 @@ const {
   goToCommunity,
   goToTag,
   goBack,
-} = useCommunityFeed()
+} = useTagFeed()
 
 const handleRefresh = async (event: CustomEvent) => {
   await refresh()
@@ -44,13 +44,13 @@ const handleInfinite = async (event: CustomEvent) => {
 
 <template>
   <ion-page>
-    <CommunityFeedHeader v-if="community" :community="community" @back="goBack" />
+    <TagFeedHeader v-if="!invalidTag && tagSlug" :tag="tagSlug" @back="goBack" />
 
     <ion-content :fullscreen="true" class="[--background:#0E1F1A]">
-      <template v-if="invalidCommunity && !loading">
+      <template v-if="invalidTag && !loading">
         <div class="flex flex-col items-center justify-center px-8 py-24 gap-4">
           <p class="text-white/40 text-sm font-body text-center m-0">
-            This community doesn&apos;t exist.
+            This tag isn&apos;t valid. Use letters, numbers, dashes, or underscores.
           </p>
           <button
             type="button"
@@ -62,7 +62,7 @@ const handleInfinite = async (event: CustomEvent) => {
         </div>
       </template>
 
-      <template v-else-if="community">
+      <template v-else-if="tagSlug">
         <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
           <ion-refresher-content pulling-icon="crescent" refreshing-spinner="crescent" />
         </ion-refresher>
@@ -71,7 +71,11 @@ const handleInfinite = async (event: CustomEvent) => {
           <ion-spinner name="crescent" class="text-sage w-8 h-8" />
         </div>
 
-        <FeedEmpty v-else-if="!loading && items.length === 0" />
+        <FeedEmpty
+          v-else-if="!loading && items.length === 0"
+          title="Nothing tagged yet"
+          description="No finds use this tag. Try another one."
+        />
 
         <div v-else class="flex flex-col gap-4 px-4 pt-4 pb-24">
           <FeedCard

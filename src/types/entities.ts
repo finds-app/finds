@@ -50,6 +50,7 @@ export interface Find {
   lng: number | null
   community: CommunityId | null
   badges: string[]
+  tags: string[]
   createdAt: string
 }
 
@@ -64,6 +65,7 @@ export interface FeedItem {
   lng: number | null
   community: CommunityId | null
   badges: string[]
+  tags: string[]
   createdAt: string
   reactionCount: number
   hasReacted: boolean
@@ -84,6 +86,7 @@ export interface FindDetail {
   lng: number | null
   community: CommunityId | null
   badges: string[]
+  tags: string[]
   createdAt: string
   reactionCount: number
   hasReacted: boolean

@@ -14,6 +14,7 @@ const {
   goToUser,
   goToMap,
   goToCommunity,
+  goToTag,
   goBack,
 } = useFindDetail()
 </script>
@@ -38,6 +39,7 @@ const {
           @tap-user="goToUser"
           @tap-location="goToMap"
           @tap-community="goToCommunity"
+          @tap-tag="goToTag"
         />
       </template>
 

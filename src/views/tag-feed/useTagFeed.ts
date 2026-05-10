@@ -1,18 +1,34 @@
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { onIonViewDidEnter } from '@ionic/vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import type { FeedItemDto } from '@/types'
-import * as findsService from '@/services/finds.service'
-import { useReactions } from '@/composables/useReactions'
-import { useAuthStore } from '@/stores/auth'
 import { buildMapRoute, buildTagRoute, pushUserProfile } from '@/constants'
+import * as findsService from '@/services/finds.service'
 import * as achievementsService from '@/services/achievements.service'
+import { useReactions } from '@/composables/useReactions'
 import { useAchievementCelebration } from '@/composables/useAchievementCelebration'
+import { useAuthStore } from '@/stores/auth'
+import { normalizeTag } from '@/services/tags.service'
 
-export const useFeed = () => {
-  const feedMode = ref<'forYou' | 'following'>('forYou')
+export const useTagFeed = () => {
+  const route = useRoute()
+  const router = useRouter()
+
+  const tagSlug = ref('')
+  const invalidTag = ref(false)
+
+  const syncRoute = () => {
+    const raw = route.params.tag as string
+    const decoded = raw ? decodeURIComponent(raw) : ''
+    const normalized = normalizeTag(decoded)
+    tagSlug.value = normalized
+    invalidTag.value = !normalized
+  }
+
+  syncRoute()
+
   const items = ref<FeedItemDto[]>([])
-  const loading = ref(false)
+  const loading = ref(!invalidTag.value)
   const refreshing = ref(false)
   const hasMore = ref(true)
   const error = ref('')
@@ -21,28 +37,25 @@ export const useFeed = () => {
   const authStore = useAuthStore()
   const { enrichWithReactions, toggleReaction: createToggle, toggleSave: createSaveToggle } = useReactions()
   const { celebrateSequence } = useAchievementCelebration()
-  const router = useRouter()
 
   const enrich = async (data: FeedItemDto[]): Promise<FeedItemDto[]> => {
     if (!authStore.user?.id) return data
     return enrichWithReactions(data, authStore.user.id)
   }
 
-  const fetchFeedPage = async (cursor?: string): Promise<FeedItemDto[]> => {
-    if (feedMode.value === 'following') {
-      const uid = authStore.user?.id
-      if (!uid) return []
-      return findsService.getFollowingFeed(uid, cursor)
-    }
-    return findsService.getFeed(cursor)
-  }
-
   const load = async () => {
-    if (loading.value) return
+    syncRoute()
+
+    if (invalidTag.value) {
+      items.value = []
+      loading.value = false
+      return
+    }
+
     loading.value = true
     error.value = ''
     try {
-      const data = await fetchFeedPage()
+      const data = await findsService.getTagFeed(tagSlug.value)
       items.value = await enrich(data)
       hasMore.value = data.length >= 20
     } catch (e: unknown) {
@@ -53,10 +66,17 @@ export const useFeed = () => {
   }
 
   const refresh = async () => {
+    syncRoute()
+
+    if (invalidTag.value) {
+      items.value = []
+      return
+    }
+
     refreshing.value = true
     error.value = ''
     try {
-      const data = await fetchFeedPage()
+      const data = await findsService.getTagFeed(tagSlug.value)
       items.value = await enrich(data)
       hasMore.value = data.length >= 20
     } catch (e: unknown) {
@@ -67,11 +87,11 @@ export const useFeed = () => {
   }
 
   const loadMore = async () => {
-    if (loading.value || !hasMore.value || items.value.length === 0) return
+    if (invalidTag.value || loading.value || !hasMore.value || items.value.length === 0) return
     loading.value = true
     try {
       const cursor = items.value[items.value.length - 1].createdAt
-      const data = await fetchFeedPage(cursor)
+      const data = await findsService.getTagFeed(tagSlug.value, cursor)
       const enriched = await enrich(data)
       items.value.push(...enriched)
       hasMore.value = data.length >= 20
@@ -80,14 +100,6 @@ export const useFeed = () => {
     } finally {
       loading.value = false
     }
-  }
-
-  const setFeedMode = (mode: 'forYou' | 'following') => {
-    if (feedMode.value === mode) return
-    feedMode.value = mode
-    items.value = []
-    hasMore.value = true
-    void load()
   }
 
   const toggleReaction = async (findId: string) => {
@@ -158,20 +170,34 @@ export const useFeed = () => {
     router.push(`/community/${communityId}`)
   }
 
-  const goToTag = (tag: string) => {
-    router.push(buildTagRoute(tag))
+  const goToTag = (t: string) => {
+    router.push(buildTagRoute(t))
+  }
+
+  const goBack = () => {
+    router.back()
   }
 
   onIonViewDidEnter(load)
 
+  watch(
+    () => route.params.tag,
+    () => {
+      syncRoute()
+      items.value = []
+      hasMore.value = true
+      void load()
+    },
+  )
+
   return {
-    feedMode,
+    tagSlug,
+    invalidTag,
     items,
     loading,
     refreshing,
     hasMore,
     error,
-    setFeedMode,
     refresh,
     loadMore,
     toggleReaction,
@@ -181,5 +207,6 @@ export const useFeed = () => {
     goToMap,
     goToCommunity,
     goToTag,
+    goBack,
   }
 }

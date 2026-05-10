@@ -13,7 +13,11 @@ export const ROUTES = {
   userProfile: '/user/:userId',
   findDetail: '/find/:findId',
   communityFeed: '/community/:communityId',
+  tagFeed: '/tag/:tag',
 } as const
+
+export const buildTagRoute = (tag: string): string =>
+  `/tag/${encodeURIComponent(tag)}`
 
 /** Opens another user's profile, or the signed-in user's tab profile when `userId` is the viewer. */
 export const pushUserProfile = (

@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { onIonViewDidEnter } from '@ionic/vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { Community, FeedItemDto } from '@/types'
-import { COMMUNITIES, buildMapRoute, pushUserProfile } from '@/constants'
+import { COMMUNITIES, buildMapRoute, buildTagRoute, pushUserProfile } from '@/constants'
 import * as findsService from '@/services/finds.service'
 import * as achievementsService from '@/services/achievements.service'
 import { useReactions } from '@/composables/useReactions'
@@ -168,6 +168,10 @@ export const useCommunityFeed = () => {
     router.push(`/community/${communityId}`)
   }
 
+  const goToTag = (tag: string) => {
+    router.push(buildTagRoute(tag))
+  }
+
   const goBack = () => {
     router.back()
   }
@@ -190,6 +194,7 @@ export const useCommunityFeed = () => {
     goToUser,
     goToMap,
     goToCommunity,
+    goToTag,
     goBack,
   }
 }

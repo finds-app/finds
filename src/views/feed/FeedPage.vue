@@ -19,6 +19,7 @@ const {
   goToUser,
   goToMap,
   goToCommunity,
+  goToTag,
 } = useFeed()
 
 const handleRefresh = async (event: CustomEvent) => {
@@ -67,6 +68,7 @@ const handleInfinite = async (event: CustomEvent) => {
           @tap-user="goToUser"
           @tap-location="(lat, lng, loc) => goToMap(lat, lng, loc)"
           @tap-community="goToCommunity"
+          @tap-tag="goToTag"
         />
       </div>
 

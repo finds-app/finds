@@ -18,6 +18,7 @@ defineEmits<{
   tapUser: [userId: string]
   tapLocation: []
   tapCommunity: [communityId: string]
+  tapTag: [tag: string]
 }>()
 
 const communityMeta = props.find.community
@@ -83,6 +84,16 @@ const communityMeta = props.find.community
         @click="$emit('tapCommunity', find.community!)"
       >
         {{ communityMeta.label }}
+      </button>
+
+      <button
+        v-for="tag in find.tags"
+        :key="tag"
+        type="button"
+        class="px-3 py-1.5 rounded-full text-xs font-medium font-body border-0 m-0 bg-white/[0.06] text-white/50 active:opacity-60 transition-opacity"
+        @click="$emit('tapTag', tag)"
+      >
+        #{{ tag }}
       </button>
     </div>
   </div>

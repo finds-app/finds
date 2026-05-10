@@ -23,6 +23,7 @@ export const usePostFind = ({ imageBlob, locationName, lat, lng }: UsePostFindOp
 
   const caption = ref('')
   const community = ref<CommunityId | null>(null)
+  const tags = ref<string[]>([])
   const posting = ref(false)
   const postError = ref('')
 
@@ -48,6 +49,7 @@ export const usePostFind = ({ imageBlob, locationName, lat, lng }: UsePostFindOp
         lat: lat.value,
         lng: lng.value,
         community: community.value,
+        tags: tags.value,
       })
       try {
         const newAchievements = await achievementsService.checkAfterPost(auth.user.id)
@@ -65,5 +67,5 @@ export const usePostFind = ({ imageBlob, locationName, lat, lng }: UsePostFindOp
     }
   }
 
-  return { caption, community, canPost, posting, postError, toggleCommunity, post }
+  return { caption, community, tags, canPost, posting, postError, toggleCommunity, post }
 }

@@ -39,6 +39,8 @@ export interface CreateFindPayload {
   lat: number | null
   lng: number | null
   community: CommunityId | null
+  /** Normalized tags (0–3); server-side normalization also applied */
+  tags?: string[]
 }
 
 export interface CreateReactionPayload {

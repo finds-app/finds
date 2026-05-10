@@ -29,3 +29,11 @@ export interface AchievementRow {
   unlocked_at: string
   metadata: Record<string, unknown> | null
 }
+
+export interface TagRow {
+  id: string
+  find_id: string
+  tag: string
+  added_by: string
+  created_at: string
+}
