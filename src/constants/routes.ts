@@ -9,6 +9,7 @@ export const ROUTES = {
   feed: '/tabs/tab1',
   discover: '/tabs/tab2',
   profile: '/tabs/tab3',
+  trophies: '/tabs/tab4',
   userProfile: '/user/:userId',
   findDetail: '/find/:findId',
   communityFeed: '/community/:communityId',

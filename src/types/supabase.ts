@@ -18,5 +18,14 @@ export interface FindRow {
   lat: number | string | null
   lng: number | string | null
   community: CommunityId | null
+  badges: string[] | null
   created_at: string
+}
+
+export interface AchievementRow {
+  id: string
+  user_id: string
+  template: string
+  unlocked_at: string
+  metadata: Record<string, unknown> | null
 }

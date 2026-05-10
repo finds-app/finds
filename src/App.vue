@@ -6,6 +6,7 @@ import { Capacitor } from '@capacitor/core'
 import { ROUTES } from '@/constants'
 import { useAuthStore } from '@/stores/auth'
 import * as authService from '@/services/auth.service'
+import AchievementCelebration from '@/components/AchievementCelebration.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -30,6 +31,7 @@ if (Capacitor.isNativePlatform()) {
 
 <template>
   <ion-app>
+    <AchievementCelebration />
     <ion-router-outlet />
   </ion-app>
 </template>

@@ -38,6 +38,7 @@ const {
   cancelEditBio,
   saveBio,
   goToFind,
+  goToTrophies,
   signOut,
   showProfileChrome,
   goBack,
@@ -59,7 +60,7 @@ const handleRefresh = async (event: CustomEvent) => {
         viewMode === 'map' ? 'profile-map-layout' : '',
       ]"
     >
-      <!-- Toggle row: same position as Explore header; other users get back, no "Profile" title -->
+      <!-- Toggle row: centered toggle; back only when viewing someone else -->
       <div
         v-if="showProfileChrome"
         :class="[
@@ -67,26 +68,23 @@ const handleRefresh = async (event: CustomEvent) => {
           viewMode === 'map' ? 'profile-map-chrome' : 'sticky top-0',
         ]"
       >
-        <div class="flex items-center justify-between gap-3 min-h-[48px] pt-2">
-          <div class="flex items-center min-w-0 shrink-0">
+        <div class="relative flex min-h-[48px] items-center justify-center pt-2">
+          <div
+            v-if="!isOwnProfile"
+            class="absolute left-0 top-1/2 z-10 flex -translate-y-1/2 items-center"
+          >
             <button
-              v-if="!isOwnProfile"
               type="button"
-              class="flex items-center justify-center w-10 h-10 -ml-1 rounded-xl border-0 bg-transparent text-cream active:bg-white/[0.06]"
+              class="-ml-1 flex h-10 w-10 items-center justify-center rounded-xl border-0 bg-transparent text-cream active:bg-white/[0.06]"
               aria-label="Go back"
               @click="goBack"
             >
               <ion-icon :icon="chevronBackOutline" class="text-[26px]" />
             </button>
-            <h1
-              v-else
-              class="font-display font-bold italic text-cream text-xl shrink-0 pl-1 m-0"
-            >
-              Profile
-            </h1>
           </div>
           <ProfileViewToggle
             v-if="finds.length > 0"
+            class="relative z-20"
             :view-mode="viewMode"
             @change="viewMode = $event"
           />
@@ -123,8 +121,10 @@ const handleRefresh = async (event: CustomEvent) => {
 
           <ProfileStats
             :stats="stats"
+            :is-own-profile="isOwnProfile"
             @tap-followers="openFollowList('followers')"
             @tap-following="openFollowList('following')"
+            @tap-trophies="goToTrophies"
           />
 
           <ProfileGrid v-if="finds.length > 0" :finds="finds" @tap-find="goToFind" />

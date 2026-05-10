@@ -4,6 +4,7 @@ import { locationOutline } from 'ionicons/icons'
 import { COMMUNITIES } from '@/constants'
 import type { FindDetailDto } from '@/types'
 import { timeAgo } from '@/utils/time'
+import { shortLocationName } from '@/utils/geocode'
 import HeartButton from '@/views/feed/components/HeartButton.vue'
 import SaveButton from '@/views/feed/components/SaveButton.vue'
 
@@ -72,7 +73,7 @@ const communityMeta = props.find.community
         @click="find.lat && find.lng ? $emit('tapLocation') : undefined"
       >
         <ion-icon :icon="locationOutline" class="text-sage text-sm" />
-        <span class="text-white/50 text-xs font-body">{{ find.locationName }}</span>
+        <span class="text-white/50 text-xs font-body">{{ shortLocationName(find.locationName) }}</span>
       </button>
 
       <button

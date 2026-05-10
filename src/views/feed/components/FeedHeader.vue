@@ -14,13 +14,13 @@ defineEmits<{
 <template>
   <!-- Same chrome layout as DiscoverHeader / Profile toggle row -->
   <div class="px-2 pb-2 pt-[env(safe-area-inset-top,0px)]">
-    <div class="flex items-center justify-between gap-3 min-h-[48px] pt-2">
-      <h1 class="font-display font-bold italic text-sage text-xl shrink-0 pl-1 m-0">
+    <div class="relative flex min-h-[48px] items-center justify-center pt-2">
+      <h1 class="pointer-events-none absolute left-0 top-1/2 z-10 m-0 -translate-y-1/2 pl-1 font-display text-xl font-bold italic text-sage">
         finds
       </h1>
 
       <div
-        class="flex rounded-xl bg-white/[0.06] p-0.5 border border-white/[0.08]"
+        class="relative z-20 flex rounded-xl border border-white/[0.08] bg-white/[0.06] p-0.5"
         role="group"
         aria-label="Feed source"
       >

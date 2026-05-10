@@ -1,4 +1,6 @@
 import type {
+  Achievement,
+  AchievementTemplateId,
   CommunityId,
   FeedItem,
   Find,
@@ -49,6 +51,17 @@ export interface ProfileStatsDto {
   findsCount: number
   followersCount: number
   followingCount: number
+  trophiesCount: number
+}
+
+export type AchievementDto = Achievement
+
+export interface AchievementProgressDto {
+  templateId: AchievementTemplateId
+  current: number
+  goal: number
+  unlocked: boolean
+  unlockedAt: string | null
 }
 
 export interface UploadedFileDto {

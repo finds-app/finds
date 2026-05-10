@@ -49,6 +49,7 @@ export interface Find {
   lat: number | null
   lng: number | null
   community: CommunityId | null
+  badges: string[]
   createdAt: string
 }
 
@@ -62,6 +63,7 @@ export interface FeedItem {
   lat: number | null
   lng: number | null
   community: CommunityId | null
+  badges: string[]
   createdAt: string
   reactionCount: number
   hasReacted: boolean
@@ -81,6 +83,7 @@ export interface FindDetail {
   lat: number | null
   lng: number | null
   community: CommunityId | null
+  badges: string[]
   createdAt: string
   reactionCount: number
   hasReacted: boolean
@@ -91,4 +94,29 @@ export interface FindDetail {
     displayName: string | null
     avatarUrl: string | null
   }
+}
+
+export type AchievementTemplateId =
+  | 'first_find'
+  | 'explorer'
+  | 'dedicated'
+  | 'globe_trotter'
+  | 'world_traveler'
+  | 'city_explorer'
+  | 'renaissance'
+  | 'curator'
+  | 'beloved'
+  | 'first_follower'
+  | 'rare_eye'
+  | 'preservationist'
+  | 'pattern_spotter'
+  | 'local_expert'
+  | 'beauty_seeker'
+
+export interface Achievement {
+  id: string
+  userId: string
+  template: AchievementTemplateId
+  unlockedAt: string
+  metadata: Record<string, unknown> | null
 }

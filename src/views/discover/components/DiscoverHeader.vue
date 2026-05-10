@@ -13,13 +13,9 @@ defineEmits<{
 
 <template>
   <div class="px-2 pb-2 pt-[env(safe-area-inset-top,0px)]">
-    <div class="flex items-center justify-between gap-3 min-h-[48px] pt-2">
-      <h1 class="font-display font-bold italic text-cream text-xl shrink-0 pl-1 m-0">
-        Explore
-      </h1>
-
+    <div class="relative flex min-h-[48px] items-center justify-center pt-2">
       <div
-        class="flex rounded-xl bg-white/[0.06] p-0.5 border border-white/[0.08]"
+        class="relative z-20 flex rounded-xl border border-white/[0.08] bg-white/[0.06] p-0.5"
         role="group"
         aria-label="Explore view"
       >

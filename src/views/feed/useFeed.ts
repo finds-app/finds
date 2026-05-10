@@ -6,6 +6,8 @@ import * as findsService from '@/services/finds.service'
 import { useReactions } from '@/composables/useReactions'
 import { useAuthStore } from '@/stores/auth'
 import { buildMapRoute, pushUserProfile } from '@/constants'
+import * as achievementsService from '@/services/achievements.service'
+import { useAchievementCelebration } from '@/composables/useAchievementCelebration'
 
 export const useFeed = () => {
   const feedMode = ref<'forYou' | 'following'>('forYou')
@@ -18,6 +20,7 @@ export const useFeed = () => {
 
   const authStore = useAuthStore()
   const { enrichWithReactions, toggleReaction: createToggle, toggleSave: createSaveToggle } = useReactions()
+  const { celebrateSequence } = useAchievementCelebration()
   const router = useRouter()
 
   const enrich = async (data: FeedItemDto[]): Promise<FeedItemDto[]> => {
@@ -99,9 +102,17 @@ export const useFeed = () => {
       item.hasReacted,
     )
 
+    const hadReacted = item.hasReacted
+
     optimisticUpdate(item)
     try {
       await execute()
+      if (!hadReacted && authStore.user?.id) {
+        const newIds = await achievementsService.checkAfterReaction(item.user.id, findId)
+        if (newIds.length > 0 && item.user.id === authStore.user.id) {
+          await celebrateSequence(newIds)
+        }
+      }
     } catch {
       rollback(item)
     } finally {

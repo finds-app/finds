@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { IonIcon } from '@ionic/vue'
 import { locationOutline } from 'ionicons/icons'
-import { COMMUNITIES } from '@/constants'
+import { COMMUNITIES, BADGE_DISPLAY_ORDER, getBadgeDefinition } from '@/constants'
 import type { FeedItemDto } from '@/types'
 import { timeAgo } from '@/utils/time'
+import { shortLocationName } from '@/utils/geocode'
 import HeartButton from './HeartButton.vue'
 import SaveButton from './SaveButton.vue'
 
@@ -24,6 +25,8 @@ const communityMeta = props.item.community
   ? COMMUNITIES.find((c) => c.id === props.item.community)
   : null
 
+const sortedBadges = BADGE_DISPLAY_ORDER.filter((id) => (props.item.badges ?? []).includes(id))
+
 const onLocationTap = (e: Event) => {
   if (!props.item.lat || !props.item.lng) return
   ;(e.currentTarget as HTMLElement).blur()
@@ -33,14 +36,33 @@ const onLocationTap = (e: Event) => {
 
 <template>
   <article class="bg-white/[0.03] rounded-2xl overflow-hidden">
-    <button class="w-full block border-0 p-0 m-0 bg-transparent leading-[0]" @click="$emit('tapImage', item.imageUrl)">
-      <img
-        :src="item.imageUrl"
-        :alt="item.caption ?? 'A find'"
-        class="w-full aspect-[4/5] object-cover block"
-        loading="lazy"
-      />
-    </button>
+    <div class="relative w-full">
+      <button class="w-full block border-0 p-0 m-0 bg-transparent leading-[0]" @click="$emit('tapImage', item.imageUrl)">
+        <img
+          :src="item.imageUrl"
+          :alt="item.caption ?? 'A find'"
+          class="w-full aspect-[4/5] object-cover block"
+          loading="lazy"
+        />
+      </button>
+      <div
+        v-if="sortedBadges.length"
+        class="pointer-events-none absolute left-2 right-2 top-2 flex flex-wrap justify-end gap-1"
+      >
+        <span
+          v-for="badgeId in sortedBadges"
+          :key="badgeId"
+          class="rounded-full px-2 py-0.5 text-[10px] font-medium font-body shadow-sm backdrop-blur-sm"
+          :style="{
+            backgroundColor: (getBadgeDefinition(badgeId)?.color ?? '#52B788') + '22',
+            color: getBadgeDefinition(badgeId)?.color ?? '#52B788',
+            border: `1px solid ${(getBadgeDefinition(badgeId)?.color ?? '#52B788')}55`,
+          }"
+        >
+          {{ getBadgeDefinition(badgeId)?.label }}
+        </span>
+      </div>
+    </div>
 
     <div class="px-4 py-3 flex flex-col gap-2">
       <div class="flex items-center justify-between">
@@ -69,7 +91,7 @@ const onLocationTap = (e: Event) => {
             @click="onLocationTap"
           >
             <ion-icon :icon="locationOutline" class="text-sage text-xs" />
-            <span class="text-white/55 text-xs font-body">{{ item.locationName }}</span>
+            <span class="text-white/55 text-xs font-body">{{ shortLocationName(item.locationName) }}</span>
           </button>
 
           <button

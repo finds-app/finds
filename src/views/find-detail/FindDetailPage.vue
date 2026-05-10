@@ -29,6 +29,7 @@ const {
         <FindDetailImage
           :image-url="find.imageUrl"
           :caption="find.caption"
+          :badges="find.badges"
         />
         <FindDetailInfo
           :find="find"

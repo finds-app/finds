@@ -10,11 +10,15 @@ import type {
   MapFindDto,
 } from '@/types'
 import { COMMUNITIES } from '@/constants'
+import * as badgesService from './badges.service'
 
 const PAGE_SIZE = 20
 
 const nullableNumber = (value: number | string | null): number | null =>
   value === null ? null : Number(value)
+
+const parseBadges = (raw: string[] | null | undefined): string[] =>
+  Array.isArray(raw) ? raw.filter((b) => typeof b === 'string') : []
 
 const mapFindRow = (row: FindRow): FindDto => ({
   id: row.id,
@@ -25,6 +29,7 @@ const mapFindRow = (row: FindRow): FindDto => ({
   lat: nullableNumber(row.lat),
   lng: nullableNumber(row.lng),
   community: row.community,
+  badges: parseBadges(row.badges),
   createdAt: row.created_at,
 })
 
@@ -36,6 +41,7 @@ interface FeedRowWithUser {
   lat: number | string | null
   lng: number | string | null
   community: string | null
+  badges: string[] | null
   created_at: string
   users: { id: string; username: string; avatar_url: string | null }
   reactions: [{ count: number }]
@@ -49,6 +55,7 @@ const mapFeedRow = (row: FeedRowWithUser): FeedItemDto => ({
   lat: nullableNumber(row.lat),
   lng: nullableNumber(row.lng),
   community: row.community as FeedItemDto['community'],
+  badges: parseBadges(row.badges),
   createdAt: row.created_at,
   reactionCount: row.reactions?.[0]?.count ?? 0,
   hasReacted: false,
@@ -60,10 +67,25 @@ const mapFeedRow = (row: FeedRowWithUser): FeedItemDto => ({
   },
 })
 
+const mergeTrendingIntoFeedItems = async (items: FeedItemDto[]): Promise<FeedItemDto[]> => {
+  if (items.length === 0) return items
+  const counts = await badgesService.getRecentHeartCountsByFindId(items.map((i) => i.id))
+  return items.map((item) => {
+    const recent = counts.get(item.id) ?? 0
+    const badges = [...item.badges]
+    if (badgesService.shouldShowTrendingBadge(recent) && !badges.includes('trending')) {
+      badges.push('trending')
+    }
+    return { ...item, badges }
+  })
+}
+
 export const getFeed = async (cursor?: string): Promise<FeedItemDto[]> => {
   let query = supabase
     .from('finds')
-    .select('id, image_url, caption, location_name, lat, lng, community, created_at, users(id, username, avatar_url), reactions(count)')
+    .select(
+      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count)',
+    )
     .order('created_at', { ascending: false })
     .limit(PAGE_SIZE)
 
@@ -73,7 +95,8 @@ export const getFeed = async (cursor?: string): Promise<FeedItemDto[]> => {
 
   const { data, error } = await query
   if (error) throw error
-  return ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
+  const mapped = ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
+  return mergeTrendingIntoFeedItems(mapped)
 }
 
 export const getCommunityFeed = async (
@@ -82,7 +105,9 @@ export const getCommunityFeed = async (
 ): Promise<FeedItemDto[]> => {
   let query = supabase
     .from('finds')
-    .select('id, image_url, caption, location_name, lat, lng, community, created_at, users(id, username, avatar_url), reactions(count)')
+    .select(
+      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count)',
+    )
     .eq('community', communityId)
     .order('created_at', { ascending: false })
     .limit(PAGE_SIZE)
@@ -93,7 +118,8 @@ export const getCommunityFeed = async (
 
   const { data, error } = await query
   if (error) throw error
-  return ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
+  const mapped = ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
+  return mergeTrendingIntoFeedItems(mapped)
 }
 
 export const getFollowingFeed = async (
@@ -112,7 +138,9 @@ export const getFollowingFeed = async (
 
   let query = supabase
     .from('finds')
-    .select('id, image_url, caption, location_name, lat, lng, community, created_at, users(id, username, avatar_url), reactions(count)')
+    .select(
+      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count)',
+    )
     .in('user_id', followedIds)
     .order('created_at', { ascending: false })
     .limit(PAGE_SIZE)
@@ -123,7 +151,8 @@ export const getFollowingFeed = async (
 
   const { data, error } = await query
   if (error) throw error
-  return ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
+  const mapped = ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
+  return mergeTrendingIntoFeedItems(mapped)
 }
 
 interface PreviewRow {
@@ -174,7 +203,20 @@ export const createFind = async (payload: CreateFindPayload): Promise<FindDto> =
     .single()
 
   if (error) throw error
-  return mapFindRow(data as FindRow)
+  const row = data as FindRow
+
+  const staticBadges = await badgesService.computeStaticBadges({
+    findId: row.id,
+    userId: payload.userId,
+    lat: nullableNumber(row.lat),
+    lng: nullableNumber(row.lng),
+    community: payload.community,
+  })
+
+  const { error: badgeError } = await supabase.from('finds').update({ badges: staticBadges }).eq('id', row.id)
+  if (badgeError) throw badgeError
+
+  return mapFindRow({ ...row, badges: staticBadges } as FindRow)
 }
 
 interface DetailRowWithUser {
@@ -185,6 +227,7 @@ interface DetailRowWithUser {
   lat: number | string | null
   lng: number | string | null
   community: string | null
+  badges: string[] | null
   created_at: string
   users: { id: string; username: string; display_name: string | null; avatar_url: string | null }
   reactions: [{ count: number }]
@@ -193,7 +236,9 @@ interface DetailRowWithUser {
 export const getFindDetail = async (findId: string): Promise<FindDetailDto | null> => {
   const { data, error } = await supabase
     .from('finds')
-    .select('id, image_url, caption, location_name, lat, lng, community, created_at, users(id, username, display_name, avatar_url), reactions(count)')
+    .select(
+      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, display_name, avatar_url), reactions(count)',
+    )
     .eq('id', findId)
     .maybeSingle()
 
@@ -201,6 +246,13 @@ export const getFindDetail = async (findId: string): Promise<FindDetailDto | nul
   if (!data) return null
 
   const row = data as unknown as DetailRowWithUser
+  const counts = await badgesService.getRecentHeartCountsByFindId([row.id])
+  const recent = counts.get(row.id) ?? 0
+  const badges = [...parseBadges(row.badges)]
+  if (badgesService.shouldShowTrendingBadge(recent) && !badges.includes('trending')) {
+    badges.push('trending')
+  }
+
   return {
     id: row.id,
     imageUrl: row.image_url,
@@ -209,6 +261,7 @@ export const getFindDetail = async (findId: string): Promise<FindDetailDto | nul
     lat: nullableNumber(row.lat),
     lng: nullableNumber(row.lng),
     community: row.community as FindDetailDto['community'],
+    badges,
     createdAt: row.created_at,
     reactionCount: row.reactions?.[0]?.count ?? 0,
     hasReacted: false,

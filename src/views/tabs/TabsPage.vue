@@ -29,7 +29,7 @@ const router = useRouter()
           </div>
         </ion-tab-button>
 
-        <ion-tab-button disabled class="[--color:rgba(255,255,255,0.35)] [--color-selected:#52B788] opacity-40">
+        <ion-tab-button tab="tab4" :href="ROUTES.trophies" class="[--color:rgba(255,255,255,0.35)] [--color-selected:#52B788]">
           <ion-icon :icon="ribbonOutline" />
           <ion-label>Trophies</ion-label>
         </ion-tab-button>

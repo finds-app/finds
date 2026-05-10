@@ -4,7 +4,9 @@ import { useRoute, useRouter } from 'vue-router'
 import type { Community, FeedItemDto } from '@/types'
 import { COMMUNITIES, buildMapRoute, pushUserProfile } from '@/constants'
 import * as findsService from '@/services/finds.service'
+import * as achievementsService from '@/services/achievements.service'
 import { useReactions } from '@/composables/useReactions'
+import { useAchievementCelebration } from '@/composables/useAchievementCelebration'
 import { useAuthStore } from '@/stores/auth'
 
 export const useCommunityFeed = () => {
@@ -32,6 +34,7 @@ export const useCommunityFeed = () => {
 
   const authStore = useAuthStore()
   const { enrichWithReactions, toggleReaction: createToggle, toggleSave: createSaveToggle } = useReactions()
+  const { celebrateSequence } = useAchievementCelebration()
 
   const enrich = async (data: FeedItemDto[]): Promise<FeedItemDto[]> => {
     if (!authStore.user?.id) return data
@@ -109,9 +112,17 @@ export const useCommunityFeed = () => {
       item.hasReacted,
     )
 
+    const hadReacted = item.hasReacted
+
     optimisticUpdate(item)
     try {
       await execute()
+      if (!hadReacted && authStore.user?.id) {
+        const newIds = await achievementsService.checkAfterReaction(item.user.id, findId)
+        if (newIds.length > 0 && item.user.id === authStore.user.id) {
+          await celebrateSequence(newIds)
+        }
+      }
     } catch {
       rollback(item)
     } finally {

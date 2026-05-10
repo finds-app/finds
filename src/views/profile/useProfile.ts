@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth'
 import * as usersService from '@/services/users.service'
 import * as findsService from '@/services/finds.service'
 import * as followsService from '@/services/follows.service'
+import * as achievementsService from '@/services/achievements.service'
 
 export const useProfile = () => {
   const route = useRoute()
@@ -16,7 +17,7 @@ export const useProfile = () => {
 
   const profile = ref<UserDto | null>(null)
   const finds = ref<FindDto[]>([])
-  const stats = ref<ProfileStatsDto>({ findsCount: 0, followersCount: 0, followingCount: 0 })
+  const stats = ref<ProfileStatsDto>({ findsCount: 0, followersCount: 0, followingCount: 0, trophiesCount: 0 })
   const loading = ref(true)
   const viewMode = ref<'grid' | 'map'>('grid')
   const editingBio = ref(false)
@@ -70,11 +71,19 @@ export const useProfile = () => {
           : Promise.resolve(false),
       ])
 
+      let trophiesCount = 0
+      try {
+        trophiesCount = await achievementsService.getAchievementsCount(userId)
+      } catch {
+        trophiesCount = 0
+      }
+
       finds.value = userFinds
       stats.value = {
         findsCount: userFinds.length,
         followersCount: followers,
         followingCount: following,
+        trophiesCount,
       }
       isFollowing.value = followingRel
     } catch {
@@ -106,6 +115,7 @@ export const useProfile = () => {
         await followsService.unfollowUser(viewerId, subjectId)
       } else {
         await followsService.followUser(viewerId, subjectId)
+        await achievementsService.checkAfterFollow(subjectId)
       }
     } catch {
       isFollowing.value = wasFollowing
@@ -169,6 +179,10 @@ export const useProfile = () => {
     router.push(`/find/${findId}`)
   }
 
+  const goToTrophies = () => {
+    router.push(ROUTES.trophies)
+  }
+
   const signOut = async () => {
     await authStore.signOut()
     router.replace(ROUTES.welcome)
@@ -207,6 +221,7 @@ export const useProfile = () => {
     cancelEditBio,
     saveBio,
     goToFind,
+    goToTrophies,
     signOut,
     goBack,
   }

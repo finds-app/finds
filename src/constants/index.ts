@@ -1,3 +1,5 @@
+export * from './badges'
+export * from './achievements'
 export * from './communities'
 export * from './routes'
 export * from './storage'

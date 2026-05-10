@@ -8,8 +8,14 @@ export const reverseGeocode = async (lat: number, lng: number): Promise<string> 
     if (!res.ok) return ''
     const data = await res.json()
     const feature = data.features?.[0]
-    return feature ? feature.place_name.split(',')[0] : ''
+    return feature ? feature.place_name : ''
   } catch {
     return ''
   }
+}
+
+/** Returns just the first segment of a comma-separated location string for display. */
+export const shortLocationName = (fullName: string | null): string => {
+  if (!fullName) return ''
+  return fullName.split(',')[0].trim()
 }

@@ -6,6 +6,8 @@ import { ROUTES } from '@/constants'
 import type { CommunityId } from '@/types'
 import * as findsService from '@/services/finds.service'
 import * as storageService from '@/services/storage.service'
+import * as achievementsService from '@/services/achievements.service'
+import { useAchievementCelebration } from '@/composables/useAchievementCelebration'
 
 interface UsePostFindOptions {
   imageBlob: Ref<Blob | null>
@@ -17,6 +19,7 @@ interface UsePostFindOptions {
 export const usePostFind = ({ imageBlob, locationName, lat, lng }: UsePostFindOptions) => {
   const router = useRouter()
   const auth = useAuthStore()
+  const { celebrateSequence } = useAchievementCelebration()
 
   const caption = ref('')
   const community = ref<CommunityId | null>(null)
@@ -46,6 +49,14 @@ export const usePostFind = ({ imageBlob, locationName, lat, lng }: UsePostFindOp
         lng: lng.value,
         community: community.value,
       })
+      try {
+        const newAchievements = await achievementsService.checkAfterPost(auth.user.id)
+        if (newAchievements.length > 0) {
+          await celebrateSequence(newAchievements)
+        }
+      } catch {
+        /* Post still succeeds; fix GRANT/RLS on public.achievements if trophies fail */
+      }
       router.replace(ROUTES.feed)
     } catch (e: unknown) {
       postError.value = e instanceof Error ? e.message : 'Something went wrong'

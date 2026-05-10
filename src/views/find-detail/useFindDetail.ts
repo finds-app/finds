@@ -5,12 +5,15 @@ import { useAuthStore } from '@/stores/auth'
 import * as findsService from '@/services/finds.service'
 import * as reactionsService from '@/services/reactions.service'
 import * as savesService from '@/services/saves.service'
+import * as achievementsService from '@/services/achievements.service'
 import { buildMapRoute, pushUserProfile } from '@/constants'
+import { useAchievementCelebration } from '@/composables/useAchievementCelebration'
 
 export const useFindDetail = () => {
   const route = useRoute()
   const router = useRouter()
   const authStore = useAuthStore()
+  const { celebrateSequence } = useAchievementCelebration()
 
   const find = ref<FindDetailDto | null>(null)
   const loading = ref(true)
@@ -42,6 +45,9 @@ export const useFindDetail = () => {
   const toggleReaction = async () => {
     if (!find.value || !authStore.user?.id) return
     const prev = find.value.hasReacted
+    const findId = find.value.id
+    const ownerId = find.value.user.id
+
     find.value.hasReacted = !prev
     find.value.reactionCount += prev ? -1 : 1
 
@@ -51,6 +57,10 @@ export const useFindDetail = () => {
       } else {
         const payload: CreateReactionPayload = { findId: find.value.id, userId: authStore.user.id, type: 'heart' }
         await reactionsService.createReaction(payload)
+        const newIds = await achievementsService.checkAfterReaction(ownerId, findId)
+        if (newIds.length > 0 && ownerId === authStore.user.id) {
+          await celebrateSequence(newIds)
+        }
       }
     } catch {
       find.value.hasReacted = prev

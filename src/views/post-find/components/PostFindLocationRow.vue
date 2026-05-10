@@ -22,6 +22,7 @@ interface SearchResult {
   id: string
   center: [number, number]
   name: string
+  fullName: string
   region: string
 }
 
@@ -32,7 +33,10 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 watch(
   () => props.locationName,
-  (val) => { if (val !== query.value) query.value = val },
+  (val) => {
+    const short = val.split(',')[0].trim()
+    if (short !== query.value) query.value = short
+  },
 )
 
 const search = async (q: string) => {
@@ -45,7 +49,7 @@ const search = async (q: string) => {
     const json = await res.json()
     results.value = (json.features ?? []).map((f: { id: string; center: [number, number]; place_name: string }) => {
       const parts = f.place_name.split(',')
-      return { id: f.id, center: f.center, name: parts[0], region: parts.slice(1).join(',').trim() }
+      return { id: f.id, center: f.center, name: parts[0].trim(), fullName: f.place_name, region: parts.slice(1).join(',').trim() }
     })
   } catch {
     results.value = []
@@ -63,7 +67,7 @@ const selectResult = (result: SearchResult) => {
   query.value = result.name
   results.value = []
   inputRef.value?.blur()
-  emit('select-place', result.name, result.center[1], result.center[0])
+  emit('select-place', result.fullName, result.center[1], result.center[0])
 }
 
 const clearQuery = () => {
