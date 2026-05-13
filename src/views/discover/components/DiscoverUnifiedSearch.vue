@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch, computed, onMounted, onUnmounted } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { IonIcon, IonSpinner } from '@ionic/vue'
 import {
   searchOutline,
@@ -14,6 +14,7 @@ import { useSearch, type PlaceSearchResult } from '../useSearch'
 
 const props = defineProps<{
   initialQuery?: string | null
+  viewMode?: 'communities' | 'map'
 }>()
 
 const emit = defineEmits<{
@@ -42,12 +43,24 @@ watch(
   () => props.initialQuery,
   (val) => {
     if (val) {
-      query.value = val
-      openDropdown()
+      dismissAfterPlace(val)
     }
   },
   { immediate: true },
 )
+
+watch(
+  () => props.viewMode,
+  (mode) => {
+    if (mode === 'communities') {
+      blurInput()
+      clear()
+    }
+  },
+)
+
+const inputRef = ref<HTMLInputElement | null>(null)
+const blurInput = () => inputRef.value?.blur()
 
 const trimmedLen = computed(() => query.value.trim().length)
 
@@ -81,6 +94,7 @@ const goTag = (tag: string) => {
 }
 
 const goPlace = (p: PlaceSearchResult) => {
+  blurInput()
   emit('select-place', p.center[0], p.center[1], 13)
   dismissAfterPlace(p.name)
 }
@@ -115,7 +129,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="relative z-[100] border-b border-white/[0.06] px-4 pb-2 pt-2">
+  <div class="relative z-[100] px-4 pb-1 pt-1">
     <!-- Backdrop: below dropdown, above page content -->
     <Transition name="fade">
       <div
@@ -133,6 +147,7 @@ onUnmounted(() => {
     >
       <ion-icon :icon="searchOutline" class="text-lg shrink-0 text-sage/70" />
       <input
+        ref="inputRef"
         :value="query"
         type="search"
         enterkeyhint="search"

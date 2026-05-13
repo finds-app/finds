@@ -12,7 +12,7 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="px-2 pb-2 pt-[env(safe-area-inset-top,0px)]">
+  <div class="px-2 pb-2">
     <div class="relative flex min-h-[48px] items-center justify-center pt-2">
       <div
         class="relative z-20 flex rounded-xl border border-white/[0.08] bg-white/[0.06] p-0.5"

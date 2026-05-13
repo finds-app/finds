@@ -7,6 +7,7 @@ import type { CommunityId } from '@/types'
 import * as findsService from '@/services/finds.service'
 import * as storageService from '@/services/storage.service'
 import * as achievementsService from '@/services/achievements.service'
+import * as chainsService from '@/services/chains.service'
 import { useAchievementCelebration } from '@/composables/useAchievementCelebration'
 
 interface UsePostFindOptions {
@@ -14,9 +15,10 @@ interface UsePostFindOptions {
   locationName: Ref<string>
   lat: Ref<number | null>
   lng: Ref<number | null>
+  linkToFindId: Ref<string | null>
 }
 
-export const usePostFind = ({ imageBlob, locationName, lat, lng }: UsePostFindOptions) => {
+export const usePostFind = ({ imageBlob, locationName, lat, lng, linkToFindId }: UsePostFindOptions) => {
   const router = useRouter()
   const auth = useAuthStore()
   const { celebrateSequence } = useAchievementCelebration()
@@ -38,10 +40,11 @@ export const usePostFind = ({ imageBlob, locationName, lat, lng }: UsePostFindOp
 
     posting.value = true
     postError.value = ''
+    const parentId = linkToFindId.value
     try {
       const path = storageService.buildFindImagePath(auth.user.id)
       const uploadedImage = await storageService.uploadImage(path, imageBlob.value)
-      await findsService.createFind({
+      const newFind = await findsService.createFind({
         userId: auth.user.id,
         imageUrl: uploadedImage.publicUrl,
         caption: caption.value.trim() || null,
@@ -51,6 +54,17 @@ export const usePostFind = ({ imageBlob, locationName, lat, lng }: UsePostFindOp
         community: community.value,
         tags: tags.value,
       })
+      if (parentId) {
+        try {
+          await chainsService.createLink({
+            findId: parentId,
+            linkedFindId: newFind.id,
+            createdBy: auth.user.id,
+          })
+        } catch {
+          /* find still created; fix find_links RLS if link fails */
+        }
+      }
       try {
         const newAchievements = await achievementsService.checkAfterPost(auth.user.id)
         if (newAchievements.length > 0) {

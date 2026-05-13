@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { ref, watch } from 'vue'
 import { IonPage, IonContent } from '@ionic/vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useImagePicker } from '@/composables/useImagePicker'
 import { usePostLocation } from '@/composables/usePostLocation'
 import { usePostFind } from './usePostFind'
@@ -12,16 +12,62 @@ import PostFindError from './components/PostFindError.vue'
 import PostFindHeader from './components/PostFindHeader.vue'
 import PostFindImagePicker from './components/PostFindImagePicker.vue'
 import PostFindLocationRow from './components/PostFindLocationRow.vue'
+import PostFindLinkedBanner from './components/PostFindLinkedBanner.vue'
+import * as findsService from '@/services/finds.service'
+import { ROUTES } from '@/constants'
 
 const router = useRouter()
+const route = useRoute()
 const { imagePreview, imageBlob, photoGps, pickImage } = useImagePicker()
 const { locationName, lat, lng, gpsLoading, setFromCoords, detectDeviceLocation, setManualLocation, clearLocation } = usePostLocation()
+
+const linkToFindId = ref<string | null>(null)
+const linkParentPreview = ref<{ imageUrl: string; username: string } | null>(null)
+
+const syncLinkToFromRoute = () => {
+  const raw = route.query.linkTo
+  const q = Array.isArray(raw) ? raw[0] : raw
+  linkToFindId.value = typeof q === 'string' && q.length > 0 ? q : null
+}
+
+watch(
+  () => route.query.linkTo,
+  () => {
+    syncLinkToFromRoute()
+  },
+  { immediate: true },
+)
+
+watch(
+  linkToFindId,
+  async (id) => {
+    if (!id) {
+      linkParentPreview.value = null
+      return
+    }
+    try {
+      const d = await findsService.getFindDetail(id)
+      linkParentPreview.value = d
+        ? { imageUrl: d.imageUrl, username: d.user.username }
+        : null
+    } catch {
+      linkParentPreview.value = null
+    }
+  },
+  { immediate: true },
+)
+
 const { caption, community, tags, canPost, posting, postError, toggleCommunity, post } = usePostFind({
   imageBlob,
   locationName,
   lat,
   lng,
+  linkToFindId,
 })
+
+const clearLinkedParent = () => {
+  void router.replace({ path: ROUTES.postFind })
+}
 
 watch(photoGps, (gps) => {
   if (gps) setFromCoords(gps.lat, gps.lng)
@@ -36,6 +82,13 @@ watch(photoGps, (gps) => {
         :posting="posting"
         @cancel="router.back()"
         @post="post"
+      />
+
+      <PostFindLinkedBanner
+        v-if="linkParentPreview && linkToFindId"
+        :parent-image-url="linkParentPreview.imageUrl"
+        :parent-username="linkParentPreview.username"
+        @remove="clearLinkedParent"
       />
 
       <PostFindImagePicker :image-preview="imagePreview" @pick="pickImage" />

@@ -1,12 +1,13 @@
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { FindDetailDto, CreateReactionPayload } from '@/types'
+import type { FindDetailDto, CreateReactionPayload, FindDto } from '@/types'
 import { useAuthStore } from '@/stores/auth'
 import * as findsService from '@/services/finds.service'
 import * as reactionsService from '@/services/reactions.service'
 import * as savesService from '@/services/saves.service'
 import * as achievementsService from '@/services/achievements.service'
-import { buildMapRoute, buildTagRoute, pushUserProfile } from '@/constants'
+import * as chainsService from '@/services/chains.service'
+import { buildMapRoute, buildTagRoute, pushUserProfile, ROUTES } from '@/constants'
 import { useAchievementCelebration } from '@/composables/useAchievementCelebration'
 
 export const useFindDetail = () => {
@@ -17,6 +18,23 @@ export const useFindDetail = () => {
 
   const find = ref<FindDetailDto | null>(null)
   const loading = ref(true)
+  const linkModalOpen = ref(false)
+  const linkSubmitting = ref(false)
+  const linkError = ref('')
+  const linkModalFinds = ref<FindDto[]>([])
+  const linkModalLoading = ref(false)
+
+  const showNoticedToo = computed(() => {
+    const uid = authStore.user?.id
+    return !!uid && uid !== find.value?.user.id
+  })
+
+  const refreshChains = async (findId: string) => {
+    if (!find.value || find.value.id !== findId) return
+    const chained = await chainsService.getLinkedFinds(findId)
+    find.value.chainedFinds = chained
+    find.value.chainCount = chained.length
+  }
 
   const load = async () => {
     const findId = route.params.findId as string
@@ -24,8 +42,14 @@ export const useFindDetail = () => {
 
     loading.value = true
     try {
-      const data = await findsService.getFindDetail(findId)
+      const [data, chained] = await Promise.all([
+        findsService.getFindDetail(findId),
+        chainsService.getLinkedFinds(findId),
+      ])
       if (!data) return
+
+      data.chainedFinds = chained
+      data.chainCount = chained.length
 
       if (authStore.user?.id) {
         const [reactedIds, savedIds] = await Promise.all([
@@ -105,11 +129,71 @@ export const useFindDetail = () => {
     router.back()
   }
 
-  load()
+  const goToPostLinked = () => {
+    if (!find.value) return
+    void router.push({ path: ROUTES.postFind, query: { linkTo: find.value.id } })
+  }
+
+  const openLinkModal = async () => {
+    linkError.value = ''
+    linkModalOpen.value = true
+    const uid = authStore.user?.id
+    const fid = find.value?.id
+    if (!uid || !fid) return
+    linkModalLoading.value = true
+    linkModalFinds.value = []
+    try {
+      linkModalFinds.value = await chainsService.getUserFindsNotLinked(uid, fid)
+    } catch {
+      linkModalFinds.value = []
+    } finally {
+      linkModalLoading.value = false
+    }
+  }
+
+  const closeLinkModal = () => {
+    linkModalOpen.value = false
+  }
+
+  const linkExistingFind = async (linkedFindId: string) => {
+    const fid = find.value?.id
+    const uid = authStore.user?.id
+    if (!fid || !uid || linkSubmitting.value) return
+
+    linkSubmitting.value = true
+    linkError.value = ''
+    try {
+      await chainsService.createLink({ findId: fid, linkedFindId, createdBy: uid })
+      await refreshChains(fid)
+      linkModalOpen.value = false
+    } catch (e: unknown) {
+      linkError.value = e instanceof Error ? e.message : 'Could not link find'
+    } finally {
+      linkSubmitting.value = false
+    }
+  }
+
+  const goToChainedFind = (findId: string) => {
+    void router.push(`/find/${findId}`)
+  }
+
+  watch(
+    () => route.params.findId,
+    () => {
+      void load()
+    },
+    { immediate: true },
+  )
 
   return {
     find,
     loading,
+    linkModalOpen,
+    linkSubmitting,
+    linkError,
+    linkModalFinds,
+    linkModalLoading,
+    showNoticedToo,
     toggleReaction,
     toggleSave,
     goToUser,
@@ -117,5 +201,10 @@ export const useFindDetail = () => {
     goToCommunity,
     goToTag,
     goBack,
+    goToPostLinked,
+    openLinkModal,
+    closeLinkModal,
+    linkExistingFind,
+    goToChainedFind,
   }
 }

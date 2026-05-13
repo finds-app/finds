@@ -2,7 +2,7 @@ import { ref, watch } from 'vue'
 import { onIonViewDidEnter } from '@ionic/vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { FeedItemDto } from '@/types'
-import { buildMapRoute, buildTagRoute, pushUserProfile } from '@/constants'
+import { buildMapRoute, buildTagRoute, pushUserProfile, ROUTES } from '@/constants'
 import * as findsService from '@/services/finds.service'
 import * as achievementsService from '@/services/achievements.service'
 import { useReactions } from '@/composables/useReactions'
@@ -174,6 +174,10 @@ export const useTagFeed = () => {
     router.push(buildTagRoute(t))
   }
 
+  const goToPostLinked = (findId: string) => {
+    void router.push({ path: ROUTES.postFind, query: { linkTo: findId } })
+  }
+
   const goBack = () => {
     router.back()
   }
@@ -207,6 +211,7 @@ export const useTagFeed = () => {
     goToMap,
     goToCommunity,
     goToTag,
+    goToPostLinked,
     goBack,
   }
 }

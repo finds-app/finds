@@ -37,3 +37,11 @@ export interface TagRow {
   added_by: string
   created_at: string
 }
+
+export interface FindLinkRow {
+  id: string
+  find_id: string
+  linked_find_id: string
+  created_by: string
+  created_at: string
+}

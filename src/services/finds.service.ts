@@ -12,6 +12,7 @@ import type {
 import { COMMUNITIES } from '@/constants'
 import * as badgesService from './badges.service'
 import * as tagsService from './tags.service'
+import * as chainsService from './chains.service'
 
 const PAGE_SIZE = 20
 
@@ -63,6 +64,7 @@ const mapFeedRow = (row: FeedRowWithUser): FeedItemDto => ({
   reactionCount: row.reactions?.[0]?.count ?? 0,
   hasReacted: false,
   hasSaved: false,
+  chainCount: 0,
   user: {
     id: row.users.id,
     username: row.users.username,
@@ -74,6 +76,12 @@ const mergeTagsIntoFeedItems = async (items: FeedItemDto[]): Promise<FeedItemDto
   if (items.length === 0) return items
   const tagMap = await tagsService.getTagsByFindIds(items.map((i) => i.id))
   return items.map((item) => ({ ...item, tags: tagMap.get(item.id) ?? [] }))
+}
+
+const mergeChainCountsIntoFeedItems = async (items: FeedItemDto[]): Promise<FeedItemDto[]> => {
+  if (items.length === 0) return items
+  const counts = await chainsService.getChainCountsByFindIds(items.map((i) => i.id))
+  return items.map((item) => ({ ...item, chainCount: counts.get(item.id) ?? 0 }))
 }
 
 const mergeTrendingIntoFeedItems = async (items: FeedItemDto[]): Promise<FeedItemDto[]> => {
@@ -106,7 +114,8 @@ export const getFeed = async (cursor?: string): Promise<FeedItemDto[]> => {
   if (error) throw error
   const mapped = ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
   const withTags = await mergeTagsIntoFeedItems(mapped)
-  return mergeTrendingIntoFeedItems(withTags)
+  const withTrending = await mergeTrendingIntoFeedItems(withTags)
+  return mergeChainCountsIntoFeedItems(withTrending)
 }
 
 export const getCommunityFeed = async (
@@ -130,7 +139,8 @@ export const getCommunityFeed = async (
   if (error) throw error
   const mapped = ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
   const withTags = await mergeTagsIntoFeedItems(mapped)
-  return mergeTrendingIntoFeedItems(withTags)
+  const withTrending = await mergeTrendingIntoFeedItems(withTags)
+  return mergeChainCountsIntoFeedItems(withTrending)
 }
 
 export const getTagFeed = async (rawTag: string, cursor?: string): Promise<FeedItemDto[]> => {
@@ -154,7 +164,8 @@ export const getTagFeed = async (rawTag: string, cursor?: string): Promise<FeedI
   if (error) throw error
   const mapped = ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
   const withTags = await mergeTagsIntoFeedItems(mapped)
-  return mergeTrendingIntoFeedItems(withTags)
+  const withTrending = await mergeTrendingIntoFeedItems(withTags)
+  return mergeChainCountsIntoFeedItems(withTrending)
 }
 
 export const getFollowingFeed = async (
@@ -188,7 +199,8 @@ export const getFollowingFeed = async (
   if (error) throw error
   const mapped = ((data ?? []) as unknown as FeedRowWithUser[]).map(mapFeedRow)
   const withTags = await mergeTagsIntoFeedItems(mapped)
-  return mergeTrendingIntoFeedItems(withTags)
+  const withTrending = await mergeTrendingIntoFeedItems(withTags)
+  return mergeChainCountsIntoFeedItems(withTrending)
 }
 
 interface PreviewRow {
@@ -316,6 +328,8 @@ export const getFindDetail = async (findId: string): Promise<FindDetailDto | nul
     reactionCount: row.reactions?.[0]?.count ?? 0,
     hasReacted: false,
     hasSaved: false,
+    chainCount: 0,
+    chainedFinds: [],
     user: {
       id: row.users.id,
       username: row.users.username,

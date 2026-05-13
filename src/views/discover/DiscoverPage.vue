@@ -54,12 +54,13 @@ const onSelectPlace = (lng: number, lat: number, zoom?: number) => {
     >
       <div
         :class="[
-          'z-30 shrink-0 bg-[#0E1F1A] border-b border-white/[0.06]',
+          'z-30 shrink-0 bg-[#0E1F1A] border-b border-white/[0.06] pt-[env(safe-area-inset-top,0px)]',
           viewMode === 'map' ? 'discover-map-chrome' : 'sticky top-0',
         ]"
       >
         <DiscoverUnifiedSearch
           :initial-query="incomingSearchQuery"
+          :view-mode="viewMode"
           @select-place="onSelectPlace"
         />
 

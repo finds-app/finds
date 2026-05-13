@@ -1,6 +1,7 @@
 import type {
   Achievement,
   AchievementTemplateId,
+  ChainedFind,
   CommunityId,
   FeedItem,
   Find,
@@ -16,7 +17,14 @@ export type FollowUserDto = FollowUser
 export type FindDto = Find
 export type FeedItemDto = FeedItem
 export type FindDetailDto = FindDetail
+export type ChainedFindDto = ChainedFind
 export type MapFindDto = MapFind
+
+export interface CreateFindLinkPayload {
+  findId: string
+  linkedFindId: string
+  createdBy: string
+}
 
 export interface CreateUserProfilePayload {
   userId: string

@@ -40,6 +40,14 @@ export interface FollowUser {
   avatarUrl: string | null
 }
 
+export interface ChainedFind {
+  id: string
+  imageUrl: string
+  locationName: string | null
+  community: CommunityId | null
+  user: { id: string; username: string }
+}
+
 export interface Find {
   id: string
   userId: string
@@ -70,6 +78,8 @@ export interface FeedItem {
   reactionCount: number
   hasReacted: boolean
   hasSaved: boolean
+  /** Number of finds linked to this find (bidirectional) */
+  chainCount: number
   user: {
     id: string
     username: string
@@ -91,6 +101,8 @@ export interface FindDetail {
   reactionCount: number
   hasReacted: boolean
   hasSaved: boolean
+  chainCount: number
+  chainedFinds: ChainedFind[]
   user: {
     id: string
     username: string

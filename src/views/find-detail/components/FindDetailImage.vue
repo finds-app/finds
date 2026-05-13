@@ -20,7 +20,7 @@ const sortedBadges = computed(() => BADGE_DISPLAY_ORDER.filter((id) => props.bad
     />
     <div
       v-if="sortedBadges.length"
-      class="pointer-events-none absolute left-3 right-3 top-3 flex flex-wrap justify-end gap-1"
+      class="pointer-events-none absolute left-3 right-3 top-[calc(env(safe-area-inset-top,0px)+12px)] flex flex-wrap justify-end gap-1"
     >
       <span
         v-for="badgeId in sortedBadges"

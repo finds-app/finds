@@ -5,7 +5,7 @@ import type { FeedItemDto } from '@/types'
 import * as findsService from '@/services/finds.service'
 import { useReactions } from '@/composables/useReactions'
 import { useAuthStore } from '@/stores/auth'
-import { buildMapRoute, buildTagRoute, pushUserProfile } from '@/constants'
+import { buildMapRoute, buildTagRoute, pushUserProfile, ROUTES } from '@/constants'
 import * as achievementsService from '@/services/achievements.service'
 import { useAchievementCelebration } from '@/composables/useAchievementCelebration'
 
@@ -162,6 +162,10 @@ export const useFeed = () => {
     router.push(buildTagRoute(tag))
   }
 
+  const goToPostLinked = (findId: string) => {
+    void router.push({ path: ROUTES.postFind, query: { linkTo: findId } })
+  }
+
   onIonViewDidEnter(load)
 
   return {
@@ -181,5 +185,6 @@ export const useFeed = () => {
     goToMap,
     goToCommunity,
     goToTag,
+    goToPostLinked,
   }
 }
