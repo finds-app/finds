@@ -8,6 +8,7 @@ import type {
   FindDetail,
   FollowUser,
   MapFind,
+  Notification,
   ReactionType,
   User,
 } from './entities'
@@ -19,6 +20,7 @@ export type FeedItemDto = FeedItem
 export type FindDetailDto = FindDetail
 export type ChainedFindDto = ChainedFind
 export type MapFindDto = MapFind
+export type NotificationDto = Notification
 
 export interface CreateFindLinkPayload {
   findId: string

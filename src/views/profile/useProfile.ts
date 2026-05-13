@@ -9,6 +9,7 @@ import * as findsService from '@/services/finds.service'
 import * as followsService from '@/services/follows.service'
 import * as achievementsService from '@/services/achievements.service'
 import * as savesService from '@/services/saves.service'
+import * as notificationsService from '@/services/notifications.service'
 
 export const useProfile = () => {
   const route = useRoute()
@@ -35,6 +36,8 @@ export const useProfile = () => {
   const followListMode = ref<'followers' | 'following' | null>(null)
   const followListUsers = ref<FollowUserDto[]>([])
   const followListLoading = ref(false)
+
+  const unreadCount = ref(0)
 
   const mapFinds = computed(() => finds.value.filter((f) => f.lat && f.lng))
 
@@ -98,6 +101,15 @@ export const useProfile = () => {
     }
 
     if (viewMode.value === 'saved') await loadSavedFinds()
+    if (isOwnProfile.value && authStore.user?.id) {
+      try {
+        unreadCount.value = await notificationsService.getUnreadCount(authStore.user.id)
+      } catch {
+        unreadCount.value = 0
+      }
+    } else {
+      unreadCount.value = 0
+    }
   }
 
   const refresh = async () => {
@@ -212,6 +224,10 @@ export const useProfile = () => {
     router.push(ROUTES.trophies)
   }
 
+  const goToNotifications = () => {
+    router.push(ROUTES.notifications)
+  }
+
   const signOut = async () => {
     await authStore.signOut()
     router.replace(ROUTES.welcome)
@@ -243,6 +259,7 @@ export const useProfile = () => {
     editingBio,
     bioDraft,
     savingBio,
+    unreadCount,
     refresh,
     toggleFollow,
     openFollowList,
@@ -253,6 +270,7 @@ export const useProfile = () => {
     saveBio,
     goToFind,
     goToTrophies,
+    goToNotifications,
     signOut,
     goBack,
   }

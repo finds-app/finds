@@ -135,3 +135,17 @@ export interface Achievement {
   unlockedAt: string
   metadata: Record<string, unknown> | null
 }
+
+export type NotificationType = 'reaction' | 'follow' | 'chain'
+
+export interface Notification {
+  id: string
+  userId: string
+  type: NotificationType
+  actorId: string
+  findId: string | null
+  read: boolean
+  createdAt: string
+  actor: { id: string; username: string; avatarUrl: string | null }
+  find: { id: string; imageUrl: string } | null
+}

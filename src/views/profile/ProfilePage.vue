@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonContent, IonRefresher, IonRefresherContent, IonIcon } from '@ionic/vue'
-import { chevronBackOutline } from 'ionicons/icons'
+import { chevronBackOutline, notificationsOutline } from 'ionicons/icons'
 import { useProfile } from './useProfile'
 import ProfileHeader from './components/ProfileHeader.vue'
 import ProfileStats from './components/ProfileStats.vue'
@@ -33,6 +33,7 @@ const {
   editingBio,
   bioDraft,
   savingBio,
+  unreadCount,
   refresh,
   toggleFollow,
   openFollowList,
@@ -43,6 +44,7 @@ const {
   saveBio,
   goToFind,
   goToTrophies,
+  goToNotifications,
   signOut,
   showProfileChrome,
   goBack,
@@ -62,8 +64,8 @@ const handleRefresh = async (event: CustomEvent) => {
       class="ion-no-border profile-chrome-header"
     >
       <ion-toolbar class="[--background:#0E1F1A] [--border-width:0] [--padding-start:0] [--padding-end:0] [--min-height:0]">
-        <div class="px-2 pb-2 border-b border-white/[0.06]">
-          <div class="relative flex min-h-[48px] items-center justify-center pt-2">
+        <div class="px-2 py-2 border-b border-white/[0.06]">
+          <div class="relative flex min-h-[48px] items-center justify-center">
             <div
               v-if="!isOwnProfile"
               class="absolute left-0 top-1/2 z-10 flex -translate-y-1/2 items-center"
@@ -84,6 +86,25 @@ const handleRefresh = async (event: CustomEvent) => {
               :is-own-profile="isOwnProfile"
               @change="viewMode = $event"
             />
+            <div
+              v-if="isOwnProfile"
+              class="absolute right-0 top-1/2 z-10 flex -translate-y-1/2 items-center"
+            >
+              <button
+                type="button"
+                class="-mr-1 relative flex h-10 w-10 items-center justify-center rounded-xl border-0 bg-transparent text-cream active:bg-white/[0.06]"
+                aria-label="Notifications"
+                @click="goToNotifications"
+              >
+                <ion-icon :icon="notificationsOutline" class="text-[22px]" />
+                <span
+                  v-if="unreadCount > 0"
+                  class="absolute top-1 right-1 min-w-[16px] h-[16px] rounded-full bg-ember text-cream text-[10px] font-bold font-body flex items-center justify-center px-1 leading-none"
+                >
+                  {{ unreadCount > 99 ? '99+' : unreadCount }}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </ion-toolbar>

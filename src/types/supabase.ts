@@ -45,3 +45,15 @@ export interface FindLinkRow {
   created_by: string
   created_at: string
 }
+
+export type NotificationTypeRow = 'reaction' | 'follow' | 'chain'
+
+export interface NotificationRow {
+  id: string
+  user_id: string
+  type: NotificationTypeRow
+  actor_id: string
+  find_id: string | null
+  read: boolean
+  created_at: string
+}

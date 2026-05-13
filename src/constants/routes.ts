@@ -14,6 +14,7 @@ export const ROUTES = {
   findDetail: '/find/:findId',
   communityFeed: '/community/:communityId',
   tagFeed: '/tag/:tag',
+  notifications: '/notifications',
 } as const
 
 export const buildTagRoute = (tag: string): string =>

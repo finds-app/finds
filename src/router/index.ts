@@ -44,6 +44,10 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/tag-feed/TagFeedPage.vue'),
   },
   {
+    path: ROUTES.notifications,
+    component: () => import('@/views/notifications/NotificationsPage.vue'),
+  },
+  {
     path: '/tabs/',
     component: TabsPage,
     children: [
