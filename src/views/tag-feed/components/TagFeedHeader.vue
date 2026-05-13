@@ -14,7 +14,7 @@ defineEmits<{
 <template>
   <ion-header class="ion-no-border">
     <ion-toolbar class="[--background:#0E1F1A] [--border-color:rgba(255,255,255,0.06)] px-1">
-      <div class="flex items-center gap-2 min-h-[52px] pt-[env(safe-area-inset-top,0px)]">
+      <div class="flex items-center gap-2 min-h-[52px]">
         <button
           type="button"
           class="shrink-0 w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center border-0 p-0 ml-1 active:opacity-70"

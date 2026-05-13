@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { onIonViewDidEnter, useIonRouter } from '@ionic/vue'
 import type { FollowUserDto, UserDto, FindDto, ProfileStatsDto } from '@/types'
@@ -8,6 +8,7 @@ import * as usersService from '@/services/users.service'
 import * as findsService from '@/services/finds.service'
 import * as followsService from '@/services/follows.service'
 import * as achievementsService from '@/services/achievements.service'
+import * as savesService from '@/services/saves.service'
 
 export const useProfile = () => {
   const route = useRoute()
@@ -19,10 +20,14 @@ export const useProfile = () => {
   const finds = ref<FindDto[]>([])
   const stats = ref<ProfileStatsDto>({ findsCount: 0, followersCount: 0, followingCount: 0, trophiesCount: 0 })
   const loading = ref(true)
-  const viewMode = ref<'grid' | 'map'>('grid')
+  const viewMode = ref<'grid' | 'map' | 'saved'>('grid')
   const editingBio = ref(false)
   const bioDraft = ref('')
   const savingBio = ref(false)
+
+  const savedFinds = ref<FindDto[]>([])
+  const savedFindsLoading = ref(false)
+  const savedFindsLoaded = ref(false)
 
   const isFollowing = ref(false)
   const followLoading = ref(false)
@@ -43,10 +48,10 @@ export const useProfile = () => {
     return paramId || authStore.user?.id || null
   })
 
-  /** Own profile: title + toggle only when they have finds. Other user: always show chrome (back + optional toggle). */
+  /** Own profile: show chrome once profile has loaded at least once (survives refresh flicker). Other user: always show chrome. */
   const showProfileChrome = computed(() => {
     if (!isOwnProfile.value) return !!(route.params.userId as string | undefined)
-    return !!profile.value && !loading.value && finds.value.length > 0
+    return !!profile.value
   })
 
   const load = async () => {
@@ -91,11 +96,35 @@ export const useProfile = () => {
     } finally {
       loading.value = false
     }
+
+    if (viewMode.value === 'saved') await loadSavedFinds()
   }
 
   const refresh = async () => {
     await load()
   }
+
+  const loadSavedFinds = async () => {
+    if (!isOwnProfile.value) return
+    const viewerId = authStore.user?.id
+    if (!viewerId || savedFindsLoading.value) return
+
+    savedFindsLoading.value = true
+    try {
+      savedFinds.value = await savesService.getSavedFinds(viewerId)
+      savedFindsLoaded.value = true
+    } catch {
+      savedFinds.value = []
+    } finally {
+      savedFindsLoading.value = false
+    }
+  }
+
+  watch(viewMode, (mode) => {
+    if (mode === 'saved' && !savedFindsLoaded.value && !savedFindsLoading.value) {
+      void loadSavedFinds()
+    }
+  })
 
   const toggleFollow = async () => {
     const viewerId = authStore.user?.id
@@ -199,6 +228,8 @@ export const useProfile = () => {
     profile,
     finds,
     mapFinds,
+    savedFinds,
+    savedFindsLoading,
     stats,
     loading,
     viewMode,

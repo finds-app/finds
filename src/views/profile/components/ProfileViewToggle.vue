@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { IonIcon } from '@ionic/vue'
-import {  mapOutline, personOutline } from 'ionicons/icons'
+import { mapOutline, personOutline, bookmarkOutline } from 'ionicons/icons'
 
 defineProps<{
-  viewMode: 'grid' | 'map'
+  viewMode: 'grid' | 'map' | 'saved'
+  isOwnProfile: boolean
 }>()
 
 const emit = defineEmits<{
-  change: [mode: 'grid' | 'map']
+  change: [mode: 'grid' | 'map' | 'saved']
 }>()
 </script>
 
@@ -38,6 +39,18 @@ const emit = defineEmits<{
     >
       <ion-icon :icon="mapOutline" class="text-base" />
       <span>Map</span>
+    </button>
+    <button
+      v-if="isOwnProfile"
+      type="button"
+      class="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-xs font-body font-medium border-0 transition-colors"
+      :class="viewMode === 'saved'
+        ? 'bg-white/[0.12] text-gold'
+        : 'bg-transparent text-white/35 active:text-white/50'"
+      @click="emit('change', 'saved')"
+    >
+      <ion-icon :icon="bookmarkOutline" class="text-base" />
+      <span>Saved</span>
     </button>
   </div>
 </template>

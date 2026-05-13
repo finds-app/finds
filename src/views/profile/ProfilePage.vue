@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { IonPage, IonContent, IonRefresher, IonRefresherContent, IonIcon } from '@ionic/vue'
+import { IonPage, IonHeader, IonToolbar, IonContent, IonRefresher, IonRefresherContent, IonIcon } from '@ionic/vue'
 import { chevronBackOutline } from 'ionicons/icons'
 import { useProfile } from './useProfile'
 import ProfileHeader from './components/ProfileHeader.vue'
@@ -7,6 +7,8 @@ import ProfileStats from './components/ProfileStats.vue'
 import ProfileGrid from './components/ProfileGrid.vue'
 import ProfileMap from './components/ProfileMap.vue'
 import ProfileEmpty from './components/ProfileEmpty.vue'
+import ProfileSavedGrid from './components/ProfileSavedGrid.vue'
+import ProfileSavedEmpty from './components/ProfileSavedEmpty.vue'
 import ProfileSkeleton from './components/ProfileSkeleton.vue'
 import ProfileViewToggle from './components/ProfileViewToggle.vue'
 import SignOutButton from './components/SignOutButton.vue'
@@ -17,6 +19,8 @@ const {
   profile,
   finds,
   mapFinds,
+  savedFinds,
+  savedFindsLoading,
   stats,
   loading,
   viewMode,
@@ -52,45 +56,47 @@ const handleRefresh = async (event: CustomEvent) => {
 
 <template>
   <ion-page>
+    <!-- Toggle row: always above scroll area so refresher starts below -->
+    <ion-header
+      v-if="showProfileChrome"
+      class="ion-no-border profile-chrome-header"
+    >
+      <ion-toolbar class="[--background:#0E1F1A] [--border-width:0] [--padding-start:0] [--padding-end:0] [--min-height:0]">
+        <div class="px-2 pb-2 border-b border-white/[0.06]">
+          <div class="relative flex min-h-[48px] items-center justify-center pt-2">
+            <div
+              v-if="!isOwnProfile"
+              class="absolute left-0 top-1/2 z-10 flex -translate-y-1/2 items-center"
+            >
+              <button
+                type="button"
+                class="-ml-1 flex h-10 w-10 items-center justify-center rounded-xl border-0 bg-transparent text-cream active:bg-white/[0.06]"
+                aria-label="Go back"
+                @click="goBack"
+              >
+                <ion-icon :icon="chevronBackOutline" class="text-[26px]" />
+              </button>
+            </div>
+            <ProfileViewToggle
+              v-if="isOwnProfile || finds.length > 0"
+              class="relative z-20"
+              :view-mode="viewMode"
+              :is-own-profile="isOwnProfile"
+              @change="viewMode = $event"
+            />
+          </div>
+        </div>
+      </ion-toolbar>
+    </ion-header>
+
     <ion-content
       :fullscreen="true"
-      :scroll-y="viewMode === 'grid'"
+      :scroll-y="viewMode !== 'map'"
       :class="[
         '[--background:#0E1F1A]',
         viewMode === 'map' ? 'profile-map-layout' : '',
       ]"
     >
-      <!-- Toggle row: centered toggle; back only when viewing someone else -->
-      <div
-        v-if="showProfileChrome"
-        :class="[
-          'z-30 shrink-0 bg-[#0E1F1A] border-b border-white/[0.06] px-2 pb-2 pt-[env(safe-area-inset-top,0px)]',
-          viewMode === 'map' ? 'profile-map-chrome' : 'sticky top-0',
-        ]"
-      >
-        <div class="relative flex min-h-[48px] items-center justify-center pt-2">
-          <div
-            v-if="!isOwnProfile"
-            class="absolute left-0 top-1/2 z-10 flex -translate-y-1/2 items-center"
-          >
-            <button
-              type="button"
-              class="-ml-1 flex h-10 w-10 items-center justify-center rounded-xl border-0 bg-transparent text-cream active:bg-white/[0.06]"
-              aria-label="Go back"
-              @click="goBack"
-            >
-              <ion-icon :icon="chevronBackOutline" class="text-[26px]" />
-            </button>
-          </div>
-          <ProfileViewToggle
-            v-if="finds.length > 0"
-            class="relative z-20"
-            :view-mode="viewMode"
-            @change="viewMode = $event"
-          />
-        </div>
-      </div>
-
       <!-- Grid mode -->
       <template v-if="viewMode === 'grid'">
         <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
@@ -134,6 +140,23 @@ const handleRefresh = async (event: CustomEvent) => {
         </template>
       </template>
 
+      <!-- Saved mode -->
+      <template v-else-if="viewMode === 'saved'">
+        <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
+          <ion-refresher-content pulling-icon="crescent" refreshing-spinner="crescent" />
+        </ion-refresher>
+
+        <ProfileSkeleton v-if="savedFindsLoading && savedFinds.length === 0" />
+        <ProfileSavedGrid
+          v-else-if="savedFinds.length > 0"
+          :finds="savedFinds"
+          @tap-find="goToFind"
+        />
+        <ProfileSavedEmpty v-else />
+
+        <div class="pb-[calc(env(safe-area-inset-bottom,16px)+96px)]" />
+      </template>
+
       <!-- Map mode -->
       <div v-else class="profile-map-stage">
         <ProfileMap :finds="mapFinds" @select-find="goToFind" />
@@ -152,6 +175,10 @@ const handleRefresh = async (event: CustomEvent) => {
 </template>
 
 <style>
+.profile-chrome-header {
+  background: #0E1F1A;
+}
+
 .profile-map-layout {
   --padding-bottom: 0;
   --padding-top: 0;
@@ -159,19 +186,8 @@ const handleRefresh = async (event: CustomEvent) => {
   --padding-end: 0;
 }
 
-.profile-map-layout::part(scroll) {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
-
-.profile-map-chrome {
-  flex: 0 0 auto;
-}
-
 .profile-map-stage {
-  flex: 1 1 0%;
+  height: 100%;
   position: relative;
   overflow: hidden;
 }
