@@ -1,30 +1,1553 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>finds</title>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>finds — things worth a second look</title>
+<meta name="description" content="A collection of curious eyes. Share the rare, the beautiful, the disappearing, the overlooked. A social photo discovery app that rewards attention." />
 
-    <base href="/" />
+<!-- Open Graph -->
+<meta property="og:title" content="finds — things worth a second look" />
+<meta property="og:description" content="A collection of curious eyes. Share the rare, the beautiful, the disappearing, the overlooked." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="images/og/preview.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
 
-    <meta name="color-scheme" content="dark" />
-    <meta
-      name="viewport"
-      content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="msapplication-tap-highlight" content="no" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="finds" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=DM+Sans:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet" />
 
-    <link rel="shortcut icon" type="image/png" href="/favicon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  </head>
+<!-- Favicon -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='%2352B788'/></svg>">
 
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+<style>
+  :root{
+    --bg: #0E1F1A;
+    --bg-deeper: #081311;
+    --text: #F8F4EF;
+    --text-dim: rgba(248,244,239,0.62);
+    --text-faint: rgba(248,244,239,0.38);
+    --accent: #52B788;
+    --card: #152B23;
+    --card-elev: #1A342B;
+    --hair: rgba(248,244,239,0.08);
+    --hair-strong: rgba(248,244,239,0.14);
+
+    --c1: #F2CC60; /* gold — Rare & bizarre */
+    --c2: #52B788; /* sage — Everyday beauty */
+    --c3: #AFA9EC; /* purple — Hyperlocal */
+    --c4: #E07A5F; /* terracotta — Before it's gone */
+    --c5: #85B7EB; /* blue — Patterns */
+    --c6: #ED93B1; /* pink — Human traces */
+    --c7: #97C459; /* lime — Overlooked ordinary */
+
+    --serif: "Fraunces", "Times New Roman", serif;
+    --sans: "DM Sans", system-ui, sans-serif;
+
+    --maxw: 1240px;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Global noise + dot texture */
+  body::before{
+    content:"";
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(rgba(248,244,239,0.035) 1px, transparent 1px);
+    background-size: 22px 22px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  body::after{
+    content:"";
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.97  0 0 0 0 0.95  0 0 0 0 0.93  0 0 0 0.06 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+    opacity: 0.5;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .wrap{
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 28px;
+    position: relative;
+    z-index: 3;
+  }
+
+  /* ─────── NAV ─────── */
+  nav{
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    background: rgba(14,31,26,0.55);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s ease, background 0.3s ease;
+  }
+  nav.scrolled{
+    border-bottom-color: var(--hair);
+    background: rgba(14,31,26,0.78);
+  }
+  .nav-inner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 18px 28px;
+    max-width: var(--maxw);
+    margin: 0 auto;
+  }
+  .logo{
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-dot{
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+    margin-bottom: 6px;
+  }
+  .nav-links{
+    display:flex;
+    gap: 36px;
+    align-items: center;
+  }
+  .nav-links a{
+    color: var(--text-dim);
+    text-decoration:none;
+    font-size: 14.5px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    transition: color 0.25s ease;
+  }
+  .nav-links a:hover{ color: var(--text); }
+  .nav-cta{
+    background: var(--accent);
+    color: #0a1a14 !important;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    transition: transform 0.2s ease, background 0.2s ease !important;
+  }
+  .nav-cta:hover{
+    background: #5fc294 !important;
+    transform: translateY(-1px);
+  }
+  @media (max-width: 760px){
+    .nav-links a:not(.nav-cta){ display:none; }
+  }
+
+  /* ─────── HERO ─────── */
+  .hero{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 140px 0 100px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* drifting photo markers in hero */
+  .hero-decor{
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .marker{
+    position: absolute;
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    opacity: 0;
+    animation: floatIn 1.4s cubic-bezier(.22,.61,.36,1) forwards, drift 8s ease-in-out infinite;
+  }
+  .marker img{ width:100%; height:100%; object-fit:cover; }
+  .marker::after{
+    content:"";
+    position: absolute;
+    bottom: -8px; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 9px solid var(--mc, var(--accent));
+  }
+
+  .m1{ top: 14%; left: 6%;  border-color: var(--c1); --mc: var(--c1); animation-delay: 0s, 0.2s; }
+  .m2{ top: 22%; right: 9%; border-color: var(--c4); --mc: var(--c4); animation-delay: 0.3s, 1s;  width: 72px; height:72px;}
+  .m3{ bottom: 18%; left: 12%; border-color: var(--c5); --mc: var(--c5); animation-delay: 0.5s, 0.6s; width: 56px; height:56px;}
+  .m4{ bottom: 26%; right: 14%; border-color: var(--c6); --mc: var(--c6); animation-delay: 0.7s, 0.4s; }
+  .m5{ top: 48%; left: 3%; border-color: var(--c3); --mc: var(--c3); animation-delay: 0.9s, 1.4s; width: 50px; height:50px;}
+  .m6{ top: 56%; right: 4%; border-color: var(--c7); --mc: var(--c7); animation-delay: 1.1s, 0.8s; width: 60px; height:60px;}
+
+  @keyframes floatIn{
+    from{ opacity:0; transform: translateY(20px) scale(0.85);}
+    to{ opacity:1; transform: translateY(0) scale(1);}
+  }
+  @keyframes drift{
+    0%,100%{ transform: translateY(0);}
+    50%{ transform: translateY(-12px);}
+  }
+
+  .hero-inner{
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .eyebrow{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 8px 16px;
+    border: 1px solid var(--hair);
+    border-radius: 999px;
+    margin-bottom: 36px;
+    animation: fadeUp 0.9s 0.1s both;
+  }
+  .eyebrow::before{
+    content:"";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  .wordmark{
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 600;
+    font-size: clamp(80px, 16vw, 200px);
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+    margin-bottom: 28px;
+    animation: fadeUp 1s 0.25s both;
+    background: linear-gradient(180deg, #F8F4EF 0%, #c9c0b3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .wordmark::first-letter{
+    /* keep aesthetic */
+  }
+
+  .tagline{
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(22px, 3vw, 32px);
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 28px;
+    animation: fadeUp 1s 0.4s both;
+  }
+
+  .hero-desc{
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    max-width: 540px;
+    margin: 0 auto 44px;
+    animation: fadeUp 1s 0.55s both;
+  }
+
+  .dots-row{
+    display: inline-flex;
+    gap: 14px;
+    margin-bottom: 48px;
+    animation: fadeUp 1s 0.7s both;
+  }
+  .dot{
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+  .dot:hover{ transform: scale(1.4); }
+  .dot.c1{background:var(--c1);}
+  .dot.c2{background:var(--c2);}
+  .dot.c3{background:var(--c3);}
+  .dot.c4{background:var(--c4);}
+  .dot.c5{background:var(--c5);}
+  .dot.c6{background:var(--c6);}
+  .dot.c7{background:var(--c7);}
+
+  .cta-row{
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 1s 0.85s both;
+  }
+
+  .btn-primary{
+    background: var(--accent);
+    color: #0a1a14;
+    padding: 16px 32px;
+    border-radius: 999px;
+    font-weight: 500;
+    font-size: 15.5px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.25s cubic-bezier(.22,.61,.36,1), box-shadow 0.25s ease;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(82,183,136,0.25);
+  }
+  .btn-primary:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(82,183,136,0.4);
+  }
+  .btn-primary svg{ transition: transform 0.3s ease; }
+  .btn-primary:hover svg{ transform: translateX(4px); }
+
+  .btn-ghost{
+    color: var(--text);
+    padding: 16px 28px;
+    border-radius: 999px;
+    font-weight: 400;
+    font-size: 15.5px;
+    text-decoration: none;
+    border: 1px solid var(--hair-strong);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.25s ease;
+  }
+  .btn-ghost:hover{
+    background: rgba(248,244,239,0.04);
+    border-color: rgba(248,244,239,0.25);
+  }
+
+  .btn-soon{
+    color: var(--text);
+    padding: 16px 32px;
+    border-radius: 999px;
+    font-weight: 500;
+    font-size: 15.5px;
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    cursor: default;
+    user-select: none;
+  }
+  .btn-soon::before{
+    content:"";
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    animation: pulseDot 2.4s ease-in-out infinite;
+  }
+  @keyframes pulseDot{
+    0%, 100%{ opacity: 1; transform: scale(1);}
+    50%{ opacity: 0.5; transform: scale(0.85);}
+  }
+  .nav-soon{
+    color: var(--text-dim) !important;
+    font-size: 14px !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid var(--hair-strong);
+    border-radius: 999px;
+    cursor: default;
+  }
+  .nav-soon::before{
+    content:"";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulseDot 2.4s ease-in-out infinite;
+  }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform: translateY(24px);}
+    to{ opacity:1; transform: translateY(0);}
+  }
+
+  /* ─────── SECTION SCAFFOLD ─────── */
+  section{
+    padding: 140px 0;
+    position: relative;
+    z-index: 3;
+  }
+
+  .section-eyebrow{
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-eyebrow::before{
+    content:"";
+    width: 28px; height: 1px;
+    background: var(--text-faint);
+  }
+
+  .section-title{
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(36px, 5.5vw, 64px);
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+    margin-bottom: 28px;
+    max-width: 16ch;
+  }
+  .section-title em{
+    font-style: italic;
+    font-weight: 300;
+    color: var(--accent);
+  }
+  .section-lede{
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    max-width: 580px;
+  }
+
+  /* reveal animation */
+  .reveal{
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.9s cubic-bezier(.22,.61,.36,1), transform 0.9s cubic-bezier(.22,.61,.36,1);
+  }
+  .reveal.in{
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─────── CONCEPT SECTION ─────── */
+  .concept-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    margin-top: 80px;
+  }
+  @media (max-width: 900px){
+    .concept-grid{ grid-template-columns: 1fr; gap: 60px;}
+  }
+
+  .concept-text p{
+    font-size: 17.5px;
+    line-height: 1.75;
+    color: var(--text-dim);
+    margin-bottom: 22px;
+  }
+  .concept-text p.lead{
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--text);
+    font-style: italic;
+    margin-bottom: 32px;
+  }
+
+  .photo-stack{
+    position: relative;
+    height: 560px;
+  }
+  .photo-stack .pic{
+    position: absolute;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+    transition: transform 0.5s ease;
+  }
+  .photo-stack .pic img{ width:100%; height:100%; object-fit:cover; display:block;}
+  .photo-stack .pic::after{
+    content:"";
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(248,244,239,0.1);
+    border-radius: 6px;
+    pointer-events: none;
+  }
+  .pic .ring{
+    position: absolute;
+    top: 14px; left: 14px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2.5px solid;
+    background: rgba(14,31,26,0.5);
+    backdrop-filter: blur(6px);
+  }
+
+  .pic1{ top: 0; left: 0; width: 62%; aspect-ratio: 4/5; z-index: 2; transform: rotate(-3deg);}
+  .pic2{ top: 30px; right: 0; width: 58%; aspect-ratio: 1/1; z-index: 3; transform: rotate(2.5deg);}
+  .pic3{ bottom: 0; left: 12%; width: 56%; aspect-ratio: 5/4; z-index: 4; transform: rotate(-1.5deg);}
+
+  .photo-stack:hover .pic1{ transform: rotate(-5deg) translate(-8px, -4px);}
+  .photo-stack:hover .pic2{ transform: rotate(4deg) translate(6px, -6px);}
+  .photo-stack:hover .pic3{ transform: rotate(-2.5deg) translate(0, 6px);}
+
+  .pic .caption{
+    position: absolute;
+    bottom: 14px; left: 14px; right: 14px;
+    background: rgba(8,19,17,0.85);
+    backdrop-filter: blur(10px);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text);
+    font-family: var(--serif);
+    font-style: italic;
+    border: 1px solid rgba(248,244,239,0.06);
+  }
+  .pic .caption span{ color: var(--text-faint); font-style: normal; font-family: var(--sans); display:block; font-size: 10.5px; margin-top: 2px;}
+
+  /* ─────── LENSES SECTION ─────── */
+  .lenses-section{
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-deeper) 50%, var(--bg) 100%);
+  }
+  .lenses-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 60px;
+    flex-wrap: wrap;
+    margin-bottom: 70px;
+  }
+  .lenses-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  @media (max-width: 1100px){ .lenses-grid{ grid-template-columns: repeat(2, 1fr);} }
+  @media (max-width: 600px){ .lenses-grid{ grid-template-columns: 1fr;} }
+
+  .lens{
+    background: var(--card);
+    border: 1px solid var(--hair);
+    border-radius: 14px;
+    padding: 28px 26px 30px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.35s cubic-bezier(.22,.61,.36,1), border-color 0.3s ease;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .lens::before{
+    content:"";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--lc);
+    opacity: 0.9;
+  }
+  .lens::after{
+    content:"";
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, var(--lc) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  .lens:hover{
+    transform: translateY(-4px);
+    border-color: var(--hair-strong);
+  }
+  .lens:hover::after{ opacity: 0.12; }
+
+  .lens-num{
+    position: absolute;
+    top: 22px; right: 24px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 14px;
+    color: var(--text-faint);
+  }
+  .lens-icon{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--lc);
+    margin-bottom: 24px;
+    position: relative;
+    box-shadow: 0 0 24px color-mix(in srgb, var(--lc) 50%, transparent);
+  }
+  .lens-icon::after{
+    content:"";
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 1px solid var(--lc);
+    opacity: 0.3;
+  }
+
+  .lens h3{
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 24px;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    margin-bottom: 14px;
+  }
+  .lens p{
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+
+  /* assign colors */
+  .lens.l1{ --lc: var(--c1);}
+  .lens.l2{ --lc: var(--c2);}
+  .lens.l3{ --lc: var(--c3);}
+  .lens.l4{ --lc: var(--c4);}
+  .lens.l5{ --lc: var(--c5);}
+  .lens.l6{ --lc: var(--c6);}
+  .lens.l7{ --lc: var(--c7);}
+
+  /* ─────── MAP SECTION ─────── */
+  .map-grid{
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 80px;
+    align-items: center;
+    margin-top: 60px;
+  }
+  @media (max-width: 1000px){
+    .map-grid{ grid-template-columns: 1fr; gap: 60px;}
+  }
+  .map-mock{
+    position: relative;
+    aspect-ratio: 4/3;
+    background: #0a1814;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--hair);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+  }
+  .map-mock svg.map-bg{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.5;
+  }
+  .map-bubble{
+    position: absolute;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 2.5px solid;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    background: var(--card);
+  }
+  .map-bubble:hover{ transform: scale(1.15) translateY(-3px); z-index: 10;}
+  .map-bubble img{ width:100%; height:100%; object-fit:cover;}
+  .map-bubble::before{
+    content:"";
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 1px solid var(--bc);
+    opacity: 0.3;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%, 100%{ transform: scale(1); opacity: 0.3;}
+    50%{ transform: scale(1.2); opacity: 0;}
+  }
+
+  .b1{ top: 18%; left: 22%; border-color: var(--c1); --bc: var(--c1);}
+  .b2{ top: 38%; left: 55%; border-color: var(--c4); --bc: var(--c4); width:56px; height:56px;}
+  .b3{ top: 62%; left: 32%; border-color: var(--c5); --bc: var(--c5); width: 42px; height:42px;}
+  .b4{ top: 30%; left: 78%; border-color: var(--c3); --bc: var(--c3);}
+  .b5{ top: 70%; left: 68%; border-color: var(--c6); --bc: var(--c6); width: 44px; height:44px;}
+  .b6{ top: 50%; left: 10%; border-color: var(--c7); --bc: var(--c7); width: 40px; height:40px;}
+  .b7{ top: 82%; left: 50%; border-color: var(--c2); --bc: var(--c2);}
+
+  .map-overlay{
+    position: absolute;
+    top: 20px; left: 20px;
+    background: rgba(14,31,26,0.85);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--hair);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .map-overlay::before{
+    content:"";
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+  .map-overlay span{ color: var(--text-faint); font-size: 11.5px;}
+
+  .map-zoom{
+    position: absolute;
+    bottom: 20px; right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: rgba(14,31,26,0.85);
+    backdrop-filter: blur(14px);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--hair);
+  }
+  .map-zoom button{
+    background: transparent;
+    border: none;
+    color: var(--text);
+    width: 36px; height: 36px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.2s ease;
+  }
+  .map-zoom button:hover{ background: rgba(248,244,239,0.08);}
+
+  /* ─────── LINKED SECTION ─────── */
+  .linked-section{ background: var(--bg-deeper);}
+  .linked-wrap{
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    margin-top: 60px;
+  }
+  @media (max-width: 1000px){
+    .linked-wrap{ grid-template-columns: 1fr; gap: 60px;}
+  }
+  .linked-mock{
+    position: relative;
+    padding: 30px 0;
+  }
+  .link-row{
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+  .link-row:last-child{ margin-bottom: 0;}
+  .link-photo{
+    width: 110px; height: 110px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2.5px solid var(--cc);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .link-photo img{ width:100%; height:100%; object-fit:cover;}
+  .link-line{
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cc), var(--cc2, var(--cc)));
+    position: relative;
+    border-radius: 2px;
+  }
+  .link-line::before{
+    content: "me too";
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 12px;
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .link-meta{
+    flex-shrink: 0;
+    text-align: left;
+    min-width: 120px;
+  }
+  .link-meta .place{
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .link-meta .when{
+    font-size: 11.5px;
+    color: var(--text-faint);
+    margin-top: 2px;
+  }
+
+  .lk1{ --cc: var(--c5); --cc2: var(--c5);}
+  .lk2{ --cc: var(--c5); --cc2: var(--c5);}
+  .lk3{ --cc: var(--c5);}
+
+  /* ─────── BADGES SECTION ─────── */
+  .badges-wrap{
+    display: grid;
+    grid-template-columns: 1fr 1.05fr;
+    gap: 80px;
+    align-items: center;
+    margin-top: 60px;
+  }
+  @media (max-width: 1000px){
+    .badges-wrap{ grid-template-columns: 1fr; gap: 60px;}
+  }
+
+  .trophy-list{
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .trophy{
+    background: var(--card);
+    border: 1px solid var(--hair);
+    border-radius: 14px;
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease, transform 0.3s ease;
+  }
+  .trophy:hover{
+    border-color: var(--tc);
+    transform: translateX(4px);
+  }
+  .trophy::before{
+    content:"";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--tc);
+  }
+  .trophy-icon{
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--tc) 15%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid color-mix(in srgb, var(--tc) 30%, transparent);
+  }
+  .trophy-icon svg{ width: 24px; height: 24px; stroke: var(--tc);}
+  .trophy-body{ flex: 1; min-width: 0;}
+  .trophy-name{
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 17px;
+    margin-bottom: 4px;
+  }
+  .trophy-desc{
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+  .trophy-progress{
+    height: 4px;
+    background: rgba(248,244,239,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .trophy-progress div{
+    height: 100%;
+    background: var(--tc);
+    border-radius: 2px;
+    transition: width 1.4s cubic-bezier(.22,.61,.36,1);
+  }
+  .trophy-pct{
+    font-size: 12px;
+    color: var(--text-faint);
+    margin-top: 6px;
+    font-family: var(--serif);
+    font-style: italic;
+  }
+
+  .t1{ --tc: var(--c5);}
+  .t2{ --tc: var(--c1);}
+  .t3{ --tc: var(--c3);}
+  .t4{ --tc: var(--c4);}
+
+  .badge-cluster{
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .badge{
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--card);
+    border: 1px solid var(--hair-strong);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge::before{
+    content:"";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--bdc);
+  }
+  .badge.gold{ --bdc: var(--c1);}
+  .badge.terra{ --bdc: var(--c4);}
+  .badge.pink{ --bdc: var(--c6);}
+  .badge.lime{ --bdc: var(--c7);}
+  .badge.blue{ --bdc: var(--c5);}
+
+  /* ─────── FEED SECTION ─────── */
+  .feed-section{
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-deeper) 100%);
+  }
+  .feed-wrap{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    margin-top: 60px;
+  }
+  @media (max-width: 1000px){
+    .feed-wrap{ grid-template-columns: 1fr; gap: 60px;}
+  }
+  .feed-mock{
+    background: var(--card);
+    border: 1px solid var(--hair);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .feed-header{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--hair);
+  }
+  .feed-avatar{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--c4), var(--c1));
+  }
+  .feed-meta{ flex:1;}
+  .feed-name{ font-size: 14px; font-weight: 500;}
+  .feed-loc{ font-size: 12px; color: var(--text-faint); display:flex; align-items:center; gap:5px;}
+  .feed-loc::before{ content:"📍"; font-size: 10px;}
+  .feed-cat-dot{
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--c4);
+    box-shadow: 0 0 8px var(--c4);
+  }
+  .feed-img{
+    width: 100%;
+    aspect-ratio: 4/5;
+    background: #2a1810;
+    overflow: hidden;
+    position: relative;
+  }
+  .feed-img img{ width:100%; height:100%; object-fit:cover;}
+  .feed-tag{
+    position: absolute;
+    bottom: 14px; left: 14px;
+    background: rgba(8,19,17,0.85);
+    backdrop-filter: blur(10px);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    color: var(--c4);
+    border: 1px solid color-mix(in srgb, var(--c4) 30%, transparent);
+    font-weight: 500;
+  }
+  .feed-actions{
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 18px 6px;
+  }
+  .feed-actions svg{ width: 22px; height: 22px; stroke: var(--text);}
+  .feed-caption{
+    padding: 8px 18px 18px;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .feed-caption strong{ color: var(--text); font-weight: 500;}
+  .feed-caption .ital{ font-family: var(--serif); font-style: italic; color: var(--text);}
+
+  /* ─────── FINAL CTA ─────── */
+  .final-cta{
+    text-align: center;
+    padding: 160px 0 140px;
+    position: relative;
+  }
+  .final-cta::before{
+    content:"";
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 800px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--hair-strong), transparent);
+  }
+  .final-wordmark{
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(60px, 12vw, 140px);
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    margin-bottom: 24px;
+    background: linear-gradient(180deg, #F8F4EF 0%, #968d80 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .final-tag{
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(20px, 2.5vw, 26px);
+    color: var(--text-dim);
+    margin-bottom: 48px;
+  }
+  .platform-note{
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--text-faint);
+    letter-spacing: 0.05em;
+  }
+
+  /* ─────── FOOTER ─────── */
+  footer{
+    border-top: 1px solid var(--hair);
+    padding: 50px 0 60px;
+    position: relative;
+    z-index: 3;
+  }
+  .footer-inner{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  .footer-links{
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .footer-links a{
+    color: var(--text-faint);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: color 0.25s ease;
+  }
+  .footer-links a:hover{ color: var(--text);}
+  .copyright{
+    font-size: 13px;
+    color: var(--text-faint);
+    font-family: var(--serif);
+    font-style: italic;
+  }
+
+  /* ─────── MOBILE ADJUSTMENTS ─────── */
+  @media (max-width: 700px){
+    section{ padding: 90px 0;}
+    .hero{ padding: 120px 0 70px; min-height: auto;}
+    .marker{ display: none;}
+    .m1, .m4{ display: block; transform: scale(0.7);}
+    .photo-stack{ height: 440px;}
+    .lenses-head{ flex-direction: column; align-items: flex-start;}
+    .link-photo{ width: 80px; height: 80px;}
+    .link-meta{ display: none;}
+    .link-line::before{ font-size: 11px; top: -18px;}
+  }
+
+  /* Smooth selection styling */
+  ::selection{ background: var(--accent); color: #0a1a14;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#" class="logo"><span>finds</span><span class="logo-dot"></span></a>
+    <div class="nav-links">
+      <a href="#concept">Concept</a>
+      <a href="#lenses">Lenses</a>
+      <a href="#map">Map</a>
+      <a href="#linked">Linked</a>
+      <a href="#badges">Badges</a>
+      <span class="nav-soon">Coming soon</span>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-decor" aria-hidden="true">
+    <div class="marker m1"><img src="images/hero/m1.jpg" alt="" loading="lazy"/></div>
+    <div class="marker m2"><img src="images/hero/m2.jpg" alt="" loading="lazy"/></div>
+    <div class="marker m3"><img src="images/hero/m3.jpg" alt="" loading="lazy"/></div>
+    <div class="marker m4"><img src="images/hero/m4.jpg" alt="" loading="lazy"/></div>
+    <div class="marker m5"><img src="images/hero/m5.jpg" alt="" loading="lazy"/></div>
+    <div class="marker m6"><img src="images/hero/m6.jpg" alt="" loading="lazy"/></div>
+  </div>
+
+  <div class="wrap hero-inner">
+    <div class="eyebrow">In development · 2026</div>
+    <h1 class="wordmark">finds</h1>
+    <p class="tagline">things worth a second look</p>
+    <p class="hero-desc">A collection of curious eyes. Share the rare, the beautiful, the disappearing, the overlooked.</p>
+    <div class="dots-row" aria-hidden="true">
+      <span class="dot c1"></span><span class="dot c2"></span><span class="dot c3"></span>
+      <span class="dot c4"></span><span class="dot c5"></span><span class="dot c6"></span>
+      <span class="dot c7"></span>
+    </div>
+    <div class="cta-row">
+      <span class="btn-soon">Coming soon</span>
+      <a href="#concept" class="btn-ghost">See how it works</a>
+    </div>
+  </div>
+</header>
+
+<!-- CONCEPT -->
+<section id="concept">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-eyebrow">The idea</div>
+      <h2 class="section-title">Not another photo app. <em>A way of seeing.</em></h2>
+    </div>
+
+    <div class="concept-grid">
+      <div class="concept-text reveal">
+        <p class="lead">finds rewards what most apps miss: the world right in front of you.</p>
+        <p>You photograph the things people walk past — the rust-eaten sign, the perfect fallen leaf, the corner shop closing after sixty years. Every find is anchored to a place, the moment you saw it, and one of seven philosophical lenses.</p>
+        <p>No filters. No selfies. No algorithms deciding what matters. Just observation, made shareable.</p>
+      </div>
+
+      <div class="photo-stack reveal" aria-hidden="true">
+        <div class="pic pic1">
+          <img src="images/concept/pic1.jpg" alt="" loading="lazy"/>
+          <div class="ring" style="border-color: var(--c4);"></div>
+          <div class="caption">An old butcher, soon to close <span>Naples · 2 days ago</span></div>
+        </div>
+        <div class="pic pic2">
+          <img src="images/concept/pic2.jpg" alt="" loading="lazy"/>
+          <div class="ring" style="border-color: var(--c2);"></div>
+          <div class="caption">Shadow on a quiet wall <span>Kyoto · last week</span></div>
+        </div>
+        <div class="pic pic3">
+          <img src="images/concept/pic3.jpg" alt="" loading="lazy"/>
+          <div class="ring" style="border-color: var(--c5);"></div>
+          <div class="caption">Same tile, two continents <span>Lisbon · today</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LENSES -->
+<section id="lenses" class="lenses-section">
+  <div class="wrap">
+    <div class="lenses-head reveal">
+      <div>
+        <div class="section-eyebrow">Seven lenses</div>
+        <h2 class="section-title">A vocabulary for <em>noticing.</em></h2>
+      </div>
+      <p class="section-lede">Every find belongs to one collection. The lens isn't a tag — it's a way of framing why this thing was worth stopping for.</p>
+    </div>
+
+    <div class="lenses-grid">
+      <article class="lens l1 reveal">
+        <span class="lens-num">01</span>
+        <div class="lens-icon"></div>
+        <h3>Rare &amp; bizarre</h3>
+        <p>Genuinely weird, genuinely rare — things most people never see.</p>
+      </article>
+      <article class="lens l2 reveal">
+        <span class="lens-num">02</span>
+        <div class="lens-icon"></div>
+        <h3>Everyday beauty</h3>
+        <p>A satisfying shadow, a perfect reflection — not rare, just noticed.</p>
+      </article>
+      <article class="lens l3 reveal">
+        <span class="lens-num">03</span>
+        <div class="lens-icon"></div>
+        <h3>Hyperlocal</h3>
+        <p>What makes a place itself — the corner sign, the landmark tree.</p>
+      </article>
+      <article class="lens l4 reveal">
+        <span class="lens-num">04</span>
+        <div class="lens-icon"></div>
+        <h3>Before it&rsquo;s gone</h3>
+        <p>Closing shops, old signs, things being demolished — documentation as care.</p>
+      </article>
+      <article class="lens l5 reveal">
+        <span class="lens-num">05</span>
+        <div class="lens-icon"></div>
+        <h3>Patterns</h3>
+        <p>Same tile in two cities — the pleasure of noticing connections across distance.</p>
+      </article>
+      <article class="lens l6 reveal">
+        <span class="lens-num">06</span>
+        <div class="lens-icon"></div>
+        <h3>Human traces</h3>
+        <p>Worn paths, notes on lampposts — left behind, unseen.</p>
+      </article>
+      <article class="lens l7 reveal">
+        <span class="lens-num">07</span>
+        <div class="lens-icon"></div>
+        <h3>Overlooked ordinary</h3>
+        <p>Not weird — just unnoticed. Attention is the point.</p>
+      </article>
+      <article class="lens reveal" style="background:transparent; border-style:dashed; --lc: rgba(248,244,239,0.2);">
+        <span class="lens-num" style="color: var(--text-faint);">∞</span>
+        <div class="lens-icon" style="background: transparent; border: 1.5px dashed var(--text-faint); box-shadow:none;"></div>
+        <h3 style="color: var(--text-dim);">Yours, maybe.</h3>
+        <p>The lenses evolve. New collections will appear as the community shows us what we missed.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- MAP -->
+<section id="map">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-eyebrow">Discovery</div>
+      <h2 class="section-title">Every find <em>lives somewhere.</em></h2>
+    </div>
+
+    <div class="map-grid">
+      <div class="concept-text reveal">
+        <p class="lead">A living map of what people have noticed — near you, or across the world.</p>
+        <p>Photo bubbles ringed in each collection's color mark every discovery. Walk a familiar street and find what others saw that you missed. Travel somewhere new and follow the trail of curious eyes.</p>
+        <p>Because a find without a place is just a photograph.</p>
+      </div>
+
+      <div class="map-mock reveal" aria-hidden="true">
+        <svg class="map-bg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(82,183,136,0.08)" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="800" height="600" fill="url(#grid)"/>
+          <!-- abstract "streets" -->
+          <path d="M 0 200 Q 200 180 400 220 T 800 240" stroke="rgba(82,183,136,0.18)" stroke-width="2" fill="none"/>
+          <path d="M 0 380 Q 250 360 450 400 T 800 420" stroke="rgba(82,183,136,0.12)" stroke-width="2" fill="none"/>
+          <path d="M 150 0 Q 180 200 220 400 T 260 600" stroke="rgba(82,183,136,0.12)" stroke-width="2" fill="none"/>
+          <path d="M 520 0 Q 540 250 580 450 T 600 600" stroke="rgba(82,183,136,0.18)" stroke-width="2" fill="none"/>
+          <!-- water blob -->
+          <path d="M 600 100 Q 750 150 780 280 Q 760 380 650 360 Q 580 320 580 220 Q 580 140 600 100 Z" fill="rgba(133,183,235,0.04)" stroke="rgba(133,183,235,0.1)"/>
+        </svg>
+
+        <div class="map-overlay">Naples, IT<span>· 312 finds nearby</span></div>
+
+        <div class="map-bubble b1"><img src="images/map/b1.jpg" alt="" loading="lazy"/></div>
+        <div class="map-bubble b2"><img src="images/map/b2.jpg" alt="" loading="lazy"/></div>
+        <div class="map-bubble b3"><img src="images/map/b3.jpg" alt="" loading="lazy"/></div>
+        <div class="map-bubble b4"><img src="images/map/b4.jpg" alt="" loading="lazy"/></div>
+        <div class="map-bubble b5"><img src="images/map/b5.jpg" alt="" loading="lazy"/></div>
+        <div class="map-bubble b6"><img src="images/map/b6.jpg" alt="" loading="lazy"/></div>
+        <div class="map-bubble b7"><img src="images/map/b7.jpg" alt="" loading="lazy"/></div>
+
+        <div class="map-zoom">
+          <button aria-label="Zoom in">+</button>
+          <button aria-label="Zoom out" style="border-top: 1px solid var(--hair);">−</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LINKED -->
+<section id="linked" class="linked-section">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-eyebrow">Linked finds</div>
+      <h2 class="section-title">"Me <em>too."</em></h2>
+      <p class="section-lede">When you spot something someone else already found — or recognize a pattern across cities — tap Me too. Your find links to theirs, building discovery threads that travel.</p>
+    </div>
+
+    <div class="linked-wrap">
+      <div class="linked-mock reveal" aria-hidden="true">
+        <div class="link-row lk1">
+          <div class="link-photo"><img src="images/linked/lk1.jpg" alt="" loading="lazy"/></div>
+          <div class="link-line"></div>
+          <div class="link-meta"><div class="place">Lisbon, PT</div><div class="when">@marina · April</div></div>
+        </div>
+        <div class="link-row lk2">
+          <div class="link-photo"><img src="images/linked/lk2.jpg" alt="" loading="lazy"/></div>
+          <div class="link-line"></div>
+          <div class="link-meta"><div class="place">Porto, PT</div><div class="when">@joao · May</div></div>
+        </div>
+        <div class="link-row lk3">
+          <div class="link-photo"><img src="images/linked/lk3.jpg" alt="" loading="lazy"/></div>
+          <div class="link-line"></div>
+          <div class="link-meta"><div class="place">Macau, MO</div><div class="when">@li · today</div></div>
+        </div>
+        <div style="text-align:center; margin-top: 24px; font-family: var(--serif); font-style: italic; color: var(--c5); font-size: 14px;">
+          linked finds · azulejo tiles · 3 observers
+        </div>
+      </div>
+
+      <div class="concept-text reveal">
+        <p class="lead">A small bridge between strangers who saw the same thing.</p>
+        <p>Maybe it's the exact same lamppost. Maybe it's a pattern of blue tiles that started in Portugal and ended up half a world away. Linked finds turn private noticing into a shared, slow-built constellation.</p>
+        <p>No other social app connects observations this way.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BADGES -->
+<section id="badges">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-eyebrow">Earned, not algorithmic</div>
+      <h2 class="section-title">Curiosity, <em>rewarded.</em></h2>
+    </div>
+
+    <div class="badges-wrap">
+      <div class="concept-text reveal">
+        <p class="lead">Find badges for things worth marking. Trophies for habits worth keeping.</p>
+        <p>Be a <strong style="color:var(--c1);">Pioneer</strong> — earned with your very first find. Get <strong style="color:var(--c4);">First Here</strong> for documenting a place no one else has noticed yet.</p>
+        <p>Full-screen celebrations. Quiet haptic taps. Recognition that means something because it's earned slowly.</p>
+
+        <div class="badge-cluster">
+          <span class="badge gold">Pioneer</span>
+          <span class="badge terra">First Here</span>
+          <span class="badge pink">Rare Find</span>
+          <span class="badge lime">Trending</span>
+          <span class="badge blue">Pattern Spotter</span>
+        </div>
+      </div>
+
+      <div class="trophy-list reveal">
+        <div class="trophy t1">
+          <div class="trophy-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+          <div class="trophy-body">
+            <div class="trophy-name">Globe Trotter</div>
+            <div class="trophy-desc">Finds in 3 different countries</div>
+            <div class="trophy-progress"><div data-width="66%" style="width:0;"></div></div>
+            <div class="trophy-pct">2 of 3</div>
+          </div>
+        </div>
+        <div class="trophy t2">
+          <div class="trophy-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 2l2.4 7.4H22l-6.2 4.5L18.2 22 12 17.5 5.8 22l2.4-8.1L2 9.4h7.6z"/></svg></div>
+          <div class="trophy-body">
+            <div class="trophy-name">Renaissance</div>
+            <div class="trophy-desc">A find in every one of the seven lenses</div>
+            <div class="trophy-progress"><div data-width="86%" style="width:0;"></div></div>
+            <div class="trophy-pct">6 of 7</div>
+          </div>
+        </div>
+        <div class="trophy t3">
+          <div class="trophy-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg></div>
+          <div class="trophy-body">
+            <div class="trophy-name">Pattern Spotter</div>
+            <div class="trophy-desc">5 finds in Patterns</div>
+            <div class="trophy-progress"><div data-width="60%" style="width:0;"></div></div>
+            <div class="trophy-pct">3 of 5</div>
+          </div>
+        </div>
+        <div class="trophy t4">
+          <div class="trophy-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div class="trophy-body">
+            <div class="trophy-name">Preservationist</div>
+            <div class="trophy-desc">5 finds in Before it's gone</div>
+            <div class="trophy-progress"><div data-width="80%" style="width:0;"></div></div>
+            <div class="trophy-pct">4 of 5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEED -->
+<section class="feed-section">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-eyebrow">Community</div>
+      <h2 class="section-title">A community of <em>curious eyes.</em></h2>
+    </div>
+
+    <div class="feed-wrap">
+      <div class="feed-mock reveal" aria-hidden="true">
+        <div class="feed-header">
+          <div class="feed-avatar"></div>
+          <div class="feed-meta">
+            <div class="feed-name">amélie.r</div>
+            <div class="feed-loc">Strasbourg · Petite France</div>
+          </div>
+          <div class="feed-cat-dot"></div>
+        </div>
+        <div class="feed-img">
+          <img src="images/feed/main.jpg" alt="" loading="lazy"/>
+          <div class="feed-tag">Before it's gone</div>
+        </div>
+        <div class="feed-actions">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" style="margin-left:auto; width:22px; height:22px; stroke: var(--text);"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+        </div>
+        <div class="feed-caption">
+          <strong>amélie.r</strong> <span class="ital">"The bakery's been here since 1923. Last week the lease wasn't renewed."</span>
+        </div>
+      </div>
+
+      <div class="concept-text reveal">
+        <p class="lead">A feed that respects your time and your attention.</p>
+        <p>Follow the people who look closely. Chronological. No algorithm pushing things at you. Hearts and comments without manipulation. Browse by lens, by tag, by place — or just see what's near.</p>
+        <p>It's smaller than other social apps. We hope it stays that way.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section id="soon" class="final-cta">
+  <div class="wrap">
+    <div class="reveal">
+      <h2 class="final-wordmark">finds</h2>
+      <p class="final-tag">things worth a second look</p>
+
+      <div class="dots-row" style="margin-bottom: 40px;" aria-hidden="true">
+        <span class="dot c1"></span><span class="dot c2"></span><span class="dot c3"></span>
+        <span class="dot c4"></span><span class="dot c5"></span><span class="dot c6"></span>
+        <span class="dot c7"></span>
+      </div>
+
+      <div class="cta-row" style="margin-bottom: 0;">
+        <span class="btn-soon">Coming soon</span>
+      </div>
+      <p class="platform-note">Android &amp; iOS · in development</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap footer-inner">
+    <a href="#" class="logo" style="font-size: 22px;"><span>finds</span><span class="logo-dot" style="margin-bottom:4px;"></span></a>
+    <div class="footer-links">
+      <a href="#">About</a>
+      <a href="#">Field notes</a>
+      <a href="#">Press kit</a>
+      <a href="#">Privacy</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="copyright">© 2026 · made with care</div>
+  </div>
+</footer>
+
+<script>
+  // Scroll-aware nav
+  const nav = document.getElementById('nav');
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if(!ticking){
+      requestAnimationFrame(() => {
+        if(window.scrollY > 40) nav.classList.add('scrolled');
+        else nav.classList.remove('scrolled');
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        // animate trophy progress bars when revealed
+        e.target.querySelectorAll('.trophy-progress > div').forEach(bar => {
+          bar.style.width = bar.dataset.width;
+        });
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Subtle parallax on hero decor container (preserves per-marker drift animations)
+  const heroDecor = document.querySelector('.hero-decor');
+  if (window.innerWidth > 700) {
+    window.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 2;
+      const y = (e.clientY / window.innerHeight - 0.5) * 2;
+      heroDecor.style.transform = `translate(${x * 8}px, ${y * 6}px)`;
+    }, { passive: true });
+  }
+</script>
+
+</body>
 </html>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">finds</string>
+    <string name="title_activity_main">finds</string>
+    <string name="package_name">io.finds.app</string>
+    <string name="custom_url_scheme">io.finds.app</string>
+</resources>

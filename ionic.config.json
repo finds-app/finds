@@ -1,7 +1,0 @@
-{
-  "name": "finds",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "vue-vite"
-}
