@@ -1,5 +1,5 @@
 import { ref, watch } from 'vue'
-import { onIonViewDidEnter } from '@ionic/vue'
+import { onIonViewDidEnter, useIonRouter } from '@ionic/vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { FeedItemDto } from '@/types'
 import { buildMapRoute, buildTagRoute, pushUserProfile, ROUTES } from '@/constants'
@@ -13,6 +13,7 @@ import { normalizeTag } from '@/services/tags.service'
 export const useTagFeed = () => {
   const route = useRoute()
   const router = useRouter()
+  const ionRouter = useIonRouter()
 
   const tagSlug = ref('')
   const invalidTag = ref(false)
@@ -163,7 +164,7 @@ export const useTagFeed = () => {
   }
 
   const goToMap = (lat: number, lng: number, locationName?: string) => {
-    router.push(buildMapRoute(lat, lng, locationName))
+    ionRouter.navigate(buildMapRoute(lat, lng, locationName), 'root', 'push')
   }
 
   const goToCommunity = (communityId: string) => {

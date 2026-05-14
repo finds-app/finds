@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { onIonViewDidEnter } from '@ionic/vue'
+import { onIonViewDidEnter, useIonRouter } from '@ionic/vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { Community, FeedItemDto } from '@/types'
 import { COMMUNITIES, buildMapRoute, buildTagRoute, pushUserProfile, ROUTES } from '@/constants'
@@ -12,6 +12,7 @@ import { useAuthStore } from '@/stores/auth'
 export const useCommunityFeed = () => {
   const route = useRoute()
   const router = useRouter()
+  const ionRouter = useIonRouter()
 
   const community = ref<Community | null>(null)
   const invalidCommunity = ref(false)
@@ -161,7 +162,7 @@ export const useCommunityFeed = () => {
   }
 
   const goToMap = (lat: number, lng: number, locationName?: string) => {
-    router.push(buildMapRoute(lat, lng, locationName))
+    ionRouter.navigate(buildMapRoute(lat, lng, locationName), 'root', 'push')
   }
 
   const goToCommunity = (communityId: string) => {

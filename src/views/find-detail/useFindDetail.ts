@@ -1,6 +1,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { FindDetailDto, CreateReactionPayload, FindDto } from '@/types'
+import { useIonRouter } from '@ionic/vue'
+import type { FindDetailDto, CreateReactionPayload, FindDto, FollowUserDto } from '@/types'
 import { useAuthStore } from '@/stores/auth'
 import * as findsService from '@/services/finds.service'
 import * as reactionsService from '@/services/reactions.service'
@@ -13,6 +14,7 @@ import { useAchievementCelebration } from '@/composables/useAchievementCelebrati
 export const useFindDetail = () => {
   const route = useRoute()
   const router = useRouter()
+  const ionRouter = useIonRouter()
   const authStore = useAuthStore()
   const { celebrateSequence } = useAchievementCelebration()
 
@@ -23,6 +25,10 @@ export const useFindDetail = () => {
   const linkError = ref('')
   const linkModalFinds = ref<FindDto[]>([])
   const linkModalLoading = ref(false)
+
+  const likesModalOpen = ref(false)
+  const likesModalUsers = ref<FollowUserDto[]>([])
+  const likesModalLoading = ref(false)
 
   const showNoticedToo = computed(() => {
     const uid = authStore.user?.id
@@ -114,7 +120,7 @@ export const useFindDetail = () => {
 
   const goToMap = () => {
     if (!find.value?.lat || !find.value?.lng) return
-    router.push(buildMapRoute(find.value.lat, find.value.lng, find.value.locationName))
+    ionRouter.navigate(buildMapRoute(find.value.lat, find.value.lng, find.value.locationName), 'root', 'push')
   }
 
   const goToCommunity = (communityId: string) => {
@@ -177,6 +183,31 @@ export const useFindDetail = () => {
     void router.push(`/find/${findId}`)
   }
 
+  const openLikesModal = async () => {
+    const fid = find.value?.id
+    if (!fid) return
+    likesModalOpen.value = true
+    likesModalLoading.value = true
+    likesModalUsers.value = []
+    try {
+      likesModalUsers.value = await reactionsService.getReactedUsers(fid)
+    } catch {
+      likesModalUsers.value = []
+    } finally {
+      likesModalLoading.value = false
+    }
+  }
+
+  const closeLikesModal = () => {
+    likesModalOpen.value = false
+    likesModalUsers.value = []
+  }
+
+  const goToLikedUser = (userId: string) => {
+    closeLikesModal()
+    pushUserProfile(router, userId, authStore.user?.id)
+  }
+
   watch(
     () => route.params.findId,
     () => {
@@ -193,6 +224,9 @@ export const useFindDetail = () => {
     linkError,
     linkModalFinds,
     linkModalLoading,
+    likesModalOpen,
+    likesModalUsers,
+    likesModalLoading,
     showNoticedToo,
     toggleReaction,
     toggleSave,
@@ -206,5 +240,8 @@ export const useFindDetail = () => {
     closeLinkModal,
     linkExistingFind,
     goToChainedFind,
+    openLikesModal,
+    closeLikesModal,
+    goToLikedUser,
   }
 }

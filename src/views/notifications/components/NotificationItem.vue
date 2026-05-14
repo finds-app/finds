@@ -15,7 +15,7 @@ const emit = defineEmits<{
 const message = computed(() => {
   switch (props.notification.type) {
     case 'reaction':
-      return 'hearted your find'
+      return 'liked your find'
     case 'follow':
       return 'started following you'
     case 'chain':

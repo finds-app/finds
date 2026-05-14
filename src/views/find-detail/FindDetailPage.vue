@@ -8,6 +8,7 @@ import FindDetailSkeleton from './components/FindDetailSkeleton.vue'
 import FindChainStrip from './components/FindChainStrip.vue'
 import FindChainActions from './components/FindChainActions.vue'
 import LinkFindModal from './components/LinkFindModal.vue'
+import LikesListModal from './components/LikesListModal.vue'
 
 const {
   find,
@@ -17,6 +18,9 @@ const {
   linkError,
   linkModalFinds,
   linkModalLoading,
+  likesModalOpen,
+  likesModalUsers,
+  likesModalLoading,
   showNoticedToo,
   toggleReaction,
   toggleSave,
@@ -30,6 +34,9 @@ const {
   closeLinkModal,
   linkExistingFind,
   goToChainedFind,
+  openLikesModal,
+  closeLikesModal,
+  goToLikedUser,
 } = useFindDetail()
 </script>
 
@@ -56,6 +63,7 @@ const {
           @tap-location="goToMap"
           @tap-community="goToCommunity"
           @tap-tag="goToTag"
+          @tap-likes="openLikesModal"
         />
 
         <!-- Chain section -->
@@ -78,6 +86,14 @@ const {
           :error-message="linkError"
           @close="closeLinkModal"
           @select="linkExistingFind"
+        />
+
+        <LikesListModal
+          :is-open="likesModalOpen"
+          :users="likesModalUsers"
+          :loading="likesModalLoading"
+          @close="closeLikesModal"
+          @tap-user="goToLikedUser"
         />
       </template>
 

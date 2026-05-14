@@ -80,7 +80,7 @@ const handleRefresh = async (event: CustomEvent) => {
             :key="block.category"
             class="scroll-mt-4"
           >
-            <div class="mb-4 flex flex-col gap-1 border-b border-white/[0.06] pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div class="flex flex-col gap-1 border-b border-white/[0.06] pb-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p class="font-body text-[10px] font-medium uppercase tracking-[0.22em] text-sage/80">
                   {{ block.kicker }}

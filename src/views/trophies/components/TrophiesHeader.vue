@@ -16,7 +16,7 @@ const dashOffset = computed(() => C * (1 - ratio.value))
 
 <template>
   <header
-    class="relative overflow-hidden px-4 pb-8 pt-[calc(env(safe-area-inset-top,0px)+8px)]"
+    class="relative overflow-hidden p-2 pt-[calc(env(safe-area-inset-top,0px)+8px)]"
   >
     <div
       class="pointer-events-none absolute inset-0 opacity-[0.35]"
@@ -76,7 +76,7 @@ const dashOffset = computed(() => C * (1 - ratio.value))
         Trophies
       </h1>
       <p class="mt-2 max-w-[17rem] font-body text-sm font-light leading-relaxed text-white/50">
-        Small proofs of attention — rarer than likes, slower than streaks.
+        Small proofs of attention — rarer than hearts, slower than streaks.
       </p>
       <p class="mt-3 font-body text-xs text-white/30">
         {{ pct }}% of the shelf filled

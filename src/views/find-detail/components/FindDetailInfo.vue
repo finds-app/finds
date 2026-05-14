@@ -21,6 +21,7 @@ defineEmits<{
   tapLocation: []
   tapCommunity: [communityId: string]
   tapTag: [tag: string]
+  tapLikes: []
 }>()
 
 const communityMeta = props.find.community
@@ -49,6 +50,7 @@ const communityMeta = props.find.community
           :reacted="find.hasReacted"
           :count="find.reactionCount"
           @toggle="$emit('toggleReaction')"
+          @tap-count="$emit('tapLikes')"
         />
         <SaveButton
           :saved="find.hasSaved"
