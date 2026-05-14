@@ -1114,15 +1114,51 @@
 
   /* ─────── MOBILE ADJUSTMENTS ─────── */
   @media (max-width: 700px){
-    section{ padding: 90px 0;}
-    .hero{ padding: 120px 0 70px; min-height: auto;}
+    section{ padding: 80px 0;}
+    .wrap{ padding: 0 20px;}
+    .hero{ padding: 110px 0 60px; min-height: auto;}
     .marker{ display: none;}
-    .m1, .m4{ display: block; transform: scale(0.7);}
-    .photo-stack{ height: 440px;}
+    .hero-desc{ font-size: 15.5px;}
+    .photo-stack{ height: 360px;}
+    .pic .caption{ padding: 6px 10px; font-size: 11px;}
+    .pic .caption span{ font-size: 9.5px;}
+    .pic .ring{ width: 22px; height: 22px; top: 10px; left: 10px;}
+    .concept-grid{ gap: 48px; margin-top: 48px;}
     .lenses-head{ flex-direction: column; align-items: flex-start;}
+    .map-grid{ margin-top: 40px;}
+    .linked-wrap{ margin-top: 40px;}
+    .badges-wrap{ margin-top: 40px;}
+    .feed-wrap{ margin-top: 40px;}
     .link-photo{ width: 80px; height: 80px;}
-    .link-meta{ display: none;}
+    .link-meta{ min-width: 80px; }
+    .link-meta .place{ font-size: 12px; }
+    .link-meta .when{ font-size: 10.5px; }
+    .link-line{ flex: 1; min-width: 0;}
     .link-line::before{ font-size: 11px; top: -18px;}
+    .link-row{ gap: 14px;}
+    .section-lede{ font-size: 16.5px;}
+    .final-cta{ padding: 100px 0 90px;}
+    .nav-soon{ display: none !important;}
+    .footer-inner{ flex-direction: column; align-items: flex-start; gap: 20px;}
+    .footer-links{ gap: 18px;}
+  }
+
+  @media (max-width: 420px){
+    .wrap{ padding: 0 16px;}
+    .nav-inner{ padding: 14px 16px;}
+    .photo-stack{ height: 300px;}
+    .pic .caption{ bottom: 8px; left: 8px; right: 8px; padding: 5px 8px; font-size: 10px;}
+    .pic .caption span{ font-size: 9px;}
+    .link-photo{ width: 68px; height: 68px;}
+    .link-meta{ min-width: 64px; }
+    .link-meta .place{ font-size: 11px; }
+    .link-meta .when{ font-size: 10px; }
+    .dots-row{ gap: 10px; margin-bottom: 36px;}
+    .cta-row{ gap: 12px;}
+    .btn-soon{ padding: 14px 24px; font-size: 14.5px;}
+    .btn-ghost{ padding: 14px 22px; font-size: 14.5px;}
+    .trophy{ padding: 16px 18px; gap: 14px;}
+    .trophy-icon{ width: 44px; height: 44px;}
   }
 
   /* Smooth selection styling */
