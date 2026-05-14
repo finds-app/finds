@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { IonIcon } from '@ionic/vue'
 import { locationOutline, cameraOutline } from 'ionicons/icons'
-import { COMMUNITIES } from '@/constants'
 import type { FindDetailDto } from '@/types'
 import { timeAgo } from '@/utils/time'
 import { shortLocationName } from '@/utils/geocode'
 import HeartButton from '@/views/feed/components/HeartButton.vue'
 import SaveButton from '@/views/feed/components/SaveButton.vue'
 
-const props = defineProps<{
+defineProps<{
   find: FindDetailDto
   showNoticedToo: boolean
 }>()
@@ -19,20 +18,14 @@ defineEmits<{
   'noticed-too': []
   tapUser: [userId: string]
   tapLocation: []
-  tapCommunity: [communityId: string]
   tapTag: [tag: string]
   tapLikes: []
 }>()
-
-const communityMeta = props.find.community
-  ? COMMUNITIES.find((c) => c.id === props.find.community)
-  : null
 </script>
 
 <template>
   <div class="px-5 -mt-6 relative z-10 flex flex-col gap-0">
 
-    <!-- 1. Actions: location left, heart/save/me-too right -->
     <div class="flex items-center justify-between gap-3 pb-4">
       <button
         v-if="find.locationName"
@@ -68,7 +61,6 @@ const communityMeta = props.find.community
       </div>
     </div>
 
-    <!-- 2. User row -->
     <div class="flex items-center justify-between pb-3">
       <button
         class="flex items-center gap-3 bg-transparent border-0 p-0 m-0"
@@ -85,25 +77,14 @@ const communityMeta = props.find.community
       <span class="text-white/20 text-[11px] font-body">{{ timeAgo(find.createdAt) }}</span>
     </div>
 
-    <!-- 3. Caption -->
     <p v-if="find.caption" class="text-cream/85 text-[15px] font-body leading-relaxed m-0 pb-3">
       {{ find.caption }}
     </p>
 
-    <!-- 4. Community + tags -->
     <div
-      v-if="communityMeta || find.tags.length > 0"
+      v-if="find.tags.length > 0"
       class="flex items-center gap-2 flex-wrap pb-1"
     >
-      <button
-        v-if="communityMeta"
-        class="px-3 py-1.5 rounded-full text-xs font-medium font-body border-0 m-0 active:opacity-60 transition-opacity"
-        :style="{ backgroundColor: communityMeta.color + '18', color: communityMeta.color }"
-        @click="$emit('tapCommunity', find.community!)"
-      >
-        {{ communityMeta.label }}
-      </button>
-
       <button
         v-for="tag in find.tags"
         :key="tag"

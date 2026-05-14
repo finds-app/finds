@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { BADGE_DISPLAY_ORDER, getBadgeDefinition } from '@/constants'
+import type { CommunityId } from '@/types'
+import MediaCommunityPill from '@/views/feed/components/MediaCommunityPill.vue'
 
 const props = defineProps<{
   imageUrl: string
   caption: string | null
   badges: string[]
+  community: CommunityId | null
+  communityLabel: string | null
+  communityColor: string | null
+}>()
+
+defineEmits<{
+  tapCommunity: [communityId: CommunityId]
 }>()
 
 const sortedBadges = computed(() => BADGE_DISPLAY_ORDER.filter((id) => props.badges.includes(id)))
@@ -18,9 +27,10 @@ const sortedBadges = computed(() => BADGE_DISPLAY_ORDER.filter((id) => props.bad
       :alt="caption ?? 'A find'"
       class="w-full max-h-[70vh] object-cover block"
     />
+
     <div
       v-if="sortedBadges.length"
-      class="pointer-events-none absolute left-3 right-3 top-[calc(env(safe-area-inset-top,0px)+12px)] flex flex-wrap justify-end gap-1"
+      class="pointer-events-none absolute right-3 top-[calc(env(safe-area-inset-top,0px)+12px)] flex flex-wrap justify-end gap-1"
     >
       <span
         v-for="badgeId in sortedBadges"
@@ -35,6 +45,20 @@ const sortedBadges = computed(() => BADGE_DISPLAY_ORDER.filter((id) => props.bad
         {{ getBadgeDefinition(badgeId)?.label }}
       </span>
     </div>
+
+
     <div class="absolute inset-x-0 bottom-[-1px] h-24 bg-gradient-to-t from-app to-transparent pointer-events-none" />
+
+    <div
+      v-if="community && communityLabel && communityColor"
+      class="pointer-events-none absolute left-5 bottom-8 flex"
+    >
+      <MediaCommunityPill
+        :community="community"
+        :label="communityLabel"
+        :color="communityColor"
+        @tap="$emit('tapCommunity', community)"
+      />
+    </div>
   </div>
 </template>

@@ -24,11 +24,11 @@ const {
   toggleReaction,
   toggleSave,
   goToFind,
+  goToFindComments,
   goToUser,
   goToMap,
   goToCommunity,
   goToTag,
-  goToPostLinked,
   goBack,
 } = useTagFeed()
 
@@ -86,7 +86,7 @@ const handleInfinite = async (event: CustomEvent) => {
             @tap-image="() => goToFind(item.id)"
             @toggle-reaction="toggleReaction"
             @toggle-save="toggleSave"
-            @noticed-too="goToPostLinked"
+            @tap-comment="goToFindComments"
             @tap-user="goToUser"
             @tap-location="(lat, lng, loc) => goToMap(lat, lng, loc)"
             @tap-community="goToCommunity"

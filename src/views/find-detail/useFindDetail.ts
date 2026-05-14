@@ -43,6 +43,17 @@ export const useFindDetail = () => {
   const commentError = ref('')
   const newCommentText = ref('')
 
+  type DetailTab = 'comments' | 'linked'
+  const activeTab = ref<DetailTab>('comments')
+
+  const setActiveTab = (tab: DetailTab) => {
+    activeTab.value = tab
+  }
+
+  const syncActiveTabFromRoute = () => {
+    activeTab.value = route.query.tab === 'linked' ? 'linked' : 'comments'
+  }
+
   const showNoticedToo = computed(() => {
     const uid = authStore.user?.id
     return !!uid && uid !== find.value?.user.id
@@ -279,10 +290,13 @@ export const useFindDetail = () => {
   watch(
     () => route.params.findId,
     () => {
+      syncActiveTabFromRoute()
       void load()
     },
     { immediate: true },
   )
+
+  watch(() => route.query.tab, syncActiveTabFromRoute)
 
   return {
     find,
@@ -300,6 +314,8 @@ export const useFindDetail = () => {
     commentSubmitting,
     commentError,
     newCommentText,
+    activeTab,
+    setActiveTab,
     showNoticedToo,
     toggleReaction,
     toggleSave,

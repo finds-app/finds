@@ -159,6 +159,10 @@ export const useTagFeed = () => {
     router.push(`/find/${findId}`)
   }
 
+  const goToFindComments = (findId: string) => {
+    router.push(`/find/${findId}?tab=comments`)
+  }
+
   const goToUser = (userId: string) => {
     pushUserProfile(router, userId, authStore.user?.id)
   }
@@ -208,6 +212,7 @@ export const useTagFeed = () => {
     toggleReaction,
     toggleSave,
     goToFind,
+    goToFindComments,
     goToUser,
     goToMap,
     goToCommunity,

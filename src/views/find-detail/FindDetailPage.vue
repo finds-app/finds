@@ -1,11 +1,14 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { IonPage, IonContent } from '@ionic/vue'
 import { useFindDetail } from './useFindDetail'
 import { useAuthStore } from '@/stores/auth'
+import { COMMUNITIES } from '@/constants'
 import FindDetailHeader from './components/FindDetailHeader.vue'
 import FindDetailImage from './components/FindDetailImage.vue'
 import FindDetailInfo from './components/FindDetailInfo.vue'
 import FindDetailSkeleton from './components/FindDetailSkeleton.vue'
+import FindDetailTabs from './components/FindDetailTabs.vue'
 import FindChainStrip from './components/FindChainStrip.vue'
 import FindChainActions from './components/FindChainActions.vue'
 import LinkFindModal from './components/LinkFindModal.vue'
@@ -30,6 +33,8 @@ const {
   commentSubmitting,
   commentError,
   newCommentText,
+  activeTab,
+  setActiveTab,
   showNoticedToo,
   toggleReaction,
   toggleSave,
@@ -50,6 +55,12 @@ const {
   removeComment,
   goToCommentUser,
 } = useFindDetail()
+
+const communityMeta = computed(() => {
+  const id = find.value?.community
+  if (!id) return null
+  return COMMUNITIES.find((c) => c.id === id) ?? null
+})
 </script>
 
 <template>
@@ -64,6 +75,10 @@ const {
           :image-url="find.imageUrl"
           :caption="find.caption"
           :badges="find.badges"
+          :community="find.community"
+          :community-label="communityMeta?.label ?? null"
+          :community-color="communityMeta?.color ?? null"
+          @tap-community="goToCommunity"
         />
         <FindDetailInfo
           :find="find"
@@ -73,33 +88,43 @@ const {
           @noticed-too="goToPostLinked"
           @tap-user="goToUser"
           @tap-location="goToMap"
-          @tap-community="goToCommunity"
           @tap-tag="goToTag"
           @tap-likes="openLikesModal"
         />
 
-        <CommentsSection
-          :comments="comments"
-          :loading="commentsLoading"
-          :submitting="commentSubmitting"
-          :error-message="commentError"
-          :new-comment-text="newCommentText"
-          :current-user-id="authStore.user?.id ?? null"
-          @update:new-comment-text="newCommentText = $event"
-          @submit="submitComment"
-          @remove="removeComment"
-          @tap-user="goToCommentUser"
+        <div class="mx-5 h-px bg-white/[0.06] mt-4" />
+
+        <FindDetailTabs
+          :active-tab="activeTab"
+          :comment-count="find.commentCount"
+          :chain-count="find.chainCount"
+          @change="setActiveTab"
         />
 
-        <!-- Chain section -->
-        <div class="px-5 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+24px)]">
-          <FindChainStrip
-            v-if="find.chainCount > 0"
-            :chained-finds="find.chainedFinds"
-            @tap-find="goToChainedFind"
+        <div class="pb-[calc(env(safe-area-inset-bottom,0px)+24px)]">
+          <CommentsSection
+            v-if="activeTab === 'comments'"
+            :comments="comments"
+            :loading="commentsLoading"
+            :submitting="commentSubmitting"
+            :error-message="commentError"
+            :new-comment-text="newCommentText"
+            :current-user-id="authStore.user?.id ?? null"
+            @update:new-comment-text="newCommentText = $event"
+            @submit="submitComment"
+            @remove="removeComment"
+            @tap-user="goToCommentUser"
           />
-          <div :class="find.chainCount > 0 ? 'mt-3' : ''">
-            <FindChainActions @open-link-modal="openLinkModal" />
+
+          <div v-else class="px-5 pt-3">
+            <FindChainStrip
+              v-if="find.chainCount > 0"
+              :chained-finds="find.chainedFinds"
+              @tap-find="goToChainedFind"
+            />
+            <div :class="find.chainCount > 0 ? 'mt-3' : ''">
+              <FindChainActions @open-link-modal="openLinkModal" />
+            </div>
           </div>
         </div>
 

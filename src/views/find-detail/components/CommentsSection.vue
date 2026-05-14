@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { IonIcon, IonSpinner, IonTextarea } from '@ionic/vue'
-import { sendOutline, trashOutline, chatbubbleOutline } from 'ionicons/icons'
+import { sendOutline, trashOutline } from 'ionicons/icons'
 import type { CommentDto } from '@/types'
 import { MAX_COMMENT_LENGTH } from '@/services/comments.service'
 import { timeAgo } from '@/utils/time'
@@ -45,21 +45,13 @@ const onKeydown = (event: KeyboardEvent) => {
 </script>
 
 <template>
-  <section class="px-5 pt-2 pb-2">
-    <div class="flex items-center gap-2 pb-3">
-      <ion-icon :icon="chatbubbleOutline" class="text-sage text-base shrink-0" />
-      <h2 class="text-cream text-sm font-semibold font-display m-0">
-        Comments
-        <span v-if="comments.length > 0" class="text-white/35 font-normal ml-1">{{ comments.length }}</span>
-      </h2>
-    </div>
-
+  <section class="px-5 pt-3 pb-2">
     <div v-if="loading" class="flex justify-center py-6">
       <ion-spinner name="crescent" class="text-sage w-6 h-6" />
     </div>
 
-    <div v-else-if="comments.length === 0" class="py-4">
-      <p class="text-white/30 text-sm font-body m-0">Be the first to comment.</p>
+    <div v-else-if="comments.length === 0" class="py-6 text-center">
+      <p class="text-white/35 text-sm font-body m-0">Be the first to comment.</p>
     </div>
 
     <ul v-else class="list-none m-0 p-0 flex flex-col gap-3">
