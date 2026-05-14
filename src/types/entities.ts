@@ -76,6 +76,7 @@ export interface FeedItem {
   tags: string[]
   createdAt: string
   reactionCount: number
+  commentCount: number
   hasReacted: boolean
   hasSaved: boolean
   /** Number of finds linked to this find (bidirectional) */
@@ -99,10 +100,24 @@ export interface FindDetail {
   tags: string[]
   createdAt: string
   reactionCount: number
+  commentCount: number
   hasReacted: boolean
   hasSaved: boolean
   chainCount: number
   chainedFinds: ChainedFind[]
+  user: {
+    id: string
+    username: string
+    displayName: string | null
+    avatarUrl: string | null
+  }
+}
+
+export interface Comment {
+  id: string
+  findId: string
+  body: string
+  createdAt: string
   user: {
     id: string
     username: string
@@ -136,7 +151,7 @@ export interface Achievement {
   metadata: Record<string, unknown> | null
 }
 
-export type NotificationType = 'reaction' | 'follow' | 'chain'
+export type NotificationType = 'reaction' | 'follow' | 'chain' | 'comment'
 
 export interface Notification {
   id: string

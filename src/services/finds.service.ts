@@ -48,6 +48,7 @@ interface FeedRowWithUser {
   created_at: string
   users: { id: string; username: string; avatar_url: string | null }
   reactions: [{ count: number }]
+  comments: [{ count: number }]
 }
 
 const mapFeedRow = (row: FeedRowWithUser): FeedItemDto => ({
@@ -62,6 +63,7 @@ const mapFeedRow = (row: FeedRowWithUser): FeedItemDto => ({
   tags: [],
   createdAt: row.created_at,
   reactionCount: row.reactions?.[0]?.count ?? 0,
+  commentCount: row.comments?.[0]?.count ?? 0,
   hasReacted: false,
   hasSaved: false,
   chainCount: 0,
@@ -101,7 +103,7 @@ export const getFeed = async (cursor?: string): Promise<FeedItemDto[]> => {
   let query = supabase
     .from('finds')
     .select(
-      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count)',
+      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count), comments(count)',
     )
     .order('created_at', { ascending: false })
     .limit(PAGE_SIZE)
@@ -125,7 +127,7 @@ export const getCommunityFeed = async (
   let query = supabase
     .from('finds')
     .select(
-      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count)',
+      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count), comments(count)',
     )
     .eq('community', communityId)
     .order('created_at', { ascending: false })
@@ -150,7 +152,7 @@ export const getTagFeed = async (rawTag: string, cursor?: string): Promise<FeedI
   let query = supabase
     .from('finds')
     .select(
-      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count), tags!inner(tag)',
+      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count), comments(count), tags!inner(tag)',
     )
     .eq('tags.tag', tag)
     .order('created_at', { ascending: false })
@@ -185,7 +187,7 @@ export const getFollowingFeed = async (
   let query = supabase
     .from('finds')
     .select(
-      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count)',
+      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count), comments(count)',
     )
     .in('user_id', followedIds)
     .order('created_at', { ascending: false })
@@ -289,13 +291,14 @@ interface DetailRowWithUser {
   created_at: string
   users: { id: string; username: string; display_name: string | null; avatar_url: string | null }
   reactions: [{ count: number }]
+  comments: [{ count: number }]
 }
 
 export const getFindDetail = async (findId: string): Promise<FindDetailDto | null> => {
   const { data, error } = await supabase
     .from('finds')
     .select(
-      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, display_name, avatar_url), reactions(count)',
+      'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, display_name, avatar_url), reactions(count), comments(count)',
     )
     .eq('id', findId)
     .maybeSingle()
@@ -326,6 +329,7 @@ export const getFindDetail = async (findId: string): Promise<FindDetailDto | nul
     tags,
     createdAt: row.created_at,
     reactionCount: row.reactions?.[0]?.count ?? 0,
+    commentCount: row.comments?.[0]?.count ?? 0,
     hasReacted: false,
     hasSaved: false,
     chainCount: 0,

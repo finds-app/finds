@@ -20,6 +20,8 @@ const message = computed(() => {
       return 'started following you'
     case 'chain':
       return 'chained a find to yours'
+    case 'comment':
+      return 'commented on your find'
     default:
       return ''
   }

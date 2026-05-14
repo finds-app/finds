@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { IonPage, IonContent } from '@ionic/vue'
 import { useFindDetail } from './useFindDetail'
+import { useAuthStore } from '@/stores/auth'
 import FindDetailHeader from './components/FindDetailHeader.vue'
 import FindDetailImage from './components/FindDetailImage.vue'
 import FindDetailInfo from './components/FindDetailInfo.vue'
@@ -9,6 +10,9 @@ import FindChainStrip from './components/FindChainStrip.vue'
 import FindChainActions from './components/FindChainActions.vue'
 import LinkFindModal from './components/LinkFindModal.vue'
 import LikesListModal from './components/LikesListModal.vue'
+import CommentsSection from './components/CommentsSection.vue'
+
+const authStore = useAuthStore()
 
 const {
   find,
@@ -21,6 +25,11 @@ const {
   likesModalOpen,
   likesModalUsers,
   likesModalLoading,
+  comments,
+  commentsLoading,
+  commentSubmitting,
+  commentError,
+  newCommentText,
   showNoticedToo,
   toggleReaction,
   toggleSave,
@@ -37,6 +46,9 @@ const {
   openLikesModal,
   closeLikesModal,
   goToLikedUser,
+  submitComment,
+  removeComment,
+  goToCommentUser,
 } = useFindDetail()
 </script>
 
@@ -64,6 +76,19 @@ const {
           @tap-community="goToCommunity"
           @tap-tag="goToTag"
           @tap-likes="openLikesModal"
+        />
+
+        <CommentsSection
+          :comments="comments"
+          :loading="commentsLoading"
+          :submitting="commentSubmitting"
+          :error-message="commentError"
+          :new-comment-text="newCommentText"
+          :current-user-id="authStore.user?.id ?? null"
+          @update:new-comment-text="newCommentText = $event"
+          @submit="submitComment"
+          @remove="removeComment"
+          @tap-user="goToCommentUser"
         />
 
         <!-- Chain section -->

@@ -2,6 +2,7 @@ import type {
   Achievement,
   AchievementTemplateId,
   ChainedFind,
+  Comment,
   CommunityId,
   FeedItem,
   Find,
@@ -21,6 +22,7 @@ export type FindDetailDto = FindDetail
 export type ChainedFindDto = ChainedFind
 export type MapFindDto = MapFind
 export type NotificationDto = Notification
+export type CommentDto = Comment
 
 export interface CreateFindLinkPayload {
   findId: string
@@ -57,6 +59,12 @@ export interface CreateReactionPayload {
   findId: string
   userId: string
   type?: ReactionType
+}
+
+export interface CreateCommentPayload {
+  findId: string
+  userId: string
+  body: string
 }
 
 export interface ProfileStatsDto {

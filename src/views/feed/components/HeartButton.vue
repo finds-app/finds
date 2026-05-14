@@ -19,7 +19,9 @@ watch(
   (newVal) => {
     if (newVal) {
       animating.value = true
-      try { Haptics.impact({ style: ImpactStyle.Light }) } catch {}
+      try { Haptics.impact({ style: ImpactStyle.Light }) } catch {
+        // noop
+      }
       setTimeout(() => { animating.value = false }, 350)
     }
   }

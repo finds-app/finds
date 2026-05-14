@@ -1,13 +1,20 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useIonRouter } from '@ionic/vue'
-import type { FindDetailDto, CreateReactionPayload, FindDto, FollowUserDto } from '@/types'
+import type {
+  CommentDto,
+  CreateReactionPayload,
+  FindDetailDto,
+  FindDto,
+  FollowUserDto,
+} from '@/types'
 import { useAuthStore } from '@/stores/auth'
 import * as findsService from '@/services/finds.service'
 import * as reactionsService from '@/services/reactions.service'
 import * as savesService from '@/services/saves.service'
 import * as achievementsService from '@/services/achievements.service'
 import * as chainsService from '@/services/chains.service'
+import * as commentsService from '@/services/comments.service'
 import { buildMapRoute, buildTagRoute, pushUserProfile, ROUTES } from '@/constants'
 import { useAchievementCelebration } from '@/composables/useAchievementCelebration'
 
@@ -30,6 +37,12 @@ export const useFindDetail = () => {
   const likesModalUsers = ref<FollowUserDto[]>([])
   const likesModalLoading = ref(false)
 
+  const comments = ref<CommentDto[]>([])
+  const commentsLoading = ref(false)
+  const commentSubmitting = ref(false)
+  const commentError = ref('')
+  const newCommentText = ref('')
+
   const showNoticedToo = computed(() => {
     const uid = authStore.user?.id
     return !!uid && uid !== find.value?.user.id
@@ -42,6 +55,17 @@ export const useFindDetail = () => {
     find.value.chainCount = chained.length
   }
 
+  const loadComments = async (findId: string) => {
+    commentsLoading.value = true
+    try {
+      comments.value = await commentsService.getComments(findId)
+    } catch {
+      comments.value = []
+    } finally {
+      commentsLoading.value = false
+    }
+  }
+
   const load = async () => {
     const findId = route.params.findId as string
     if (!findId) return
@@ -51,6 +75,7 @@ export const useFindDetail = () => {
       const [data, chained] = await Promise.all([
         findsService.getFindDetail(findId),
         chainsService.getLinkedFinds(findId),
+        loadComments(findId),
       ])
       if (!data) return
 
@@ -208,6 +233,49 @@ export const useFindDetail = () => {
     pushUserProfile(router, userId, authStore.user?.id)
   }
 
+  const submitComment = async () => {
+    const fid = find.value?.id
+    const uid = authStore.user?.id
+    const body = newCommentText.value.trim()
+    if (!fid || !uid || !body || commentSubmitting.value) return
+
+    commentSubmitting.value = true
+    commentError.value = ''
+    try {
+      const created = await commentsService.createComment({ findId: fid, userId: uid, body })
+      comments.value = [...comments.value, created]
+      if (find.value) find.value.commentCount += 1
+      newCommentText.value = ''
+    } catch (e: unknown) {
+      commentError.value = e instanceof Error ? e.message : 'Could not post comment'
+    } finally {
+      commentSubmitting.value = false
+    }
+  }
+
+  const removeComment = async (commentId: string) => {
+    const uid = authStore.user?.id
+    if (!uid) return
+
+    const prev = comments.value
+    const next = prev.filter((c) => c.id !== commentId)
+    if (next.length === prev.length) return
+
+    comments.value = next
+    if (find.value) find.value.commentCount = Math.max(0, find.value.commentCount - 1)
+
+    try {
+      await commentsService.deleteComment(commentId, uid)
+    } catch {
+      comments.value = prev
+      if (find.value) find.value.commentCount += 1
+    }
+  }
+
+  const goToCommentUser = (userId: string) => {
+    pushUserProfile(router, userId, authStore.user?.id)
+  }
+
   watch(
     () => route.params.findId,
     () => {
@@ -227,6 +295,11 @@ export const useFindDetail = () => {
     likesModalOpen,
     likesModalUsers,
     likesModalLoading,
+    comments,
+    commentsLoading,
+    commentSubmitting,
+    commentError,
+    newCommentText,
     showNoticedToo,
     toggleReaction,
     toggleSave,
@@ -243,5 +316,8 @@ export const useFindDetail = () => {
     openLikesModal,
     closeLikesModal,
     goToLikedUser,
+    submitComment,
+    removeComment,
+    goToCommentUser,
   }
 }
