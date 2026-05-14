@@ -8,14 +8,14 @@ import {
   IonInfiniteScrollContent,
   IonSpinner,
 } from '@ionic/vue'
-import { useCommunityFeed } from './useCommunityFeed'
-import CommunityFeedHeader from './components/CommunityFeedHeader.vue'
+import { useCollectionFeed } from './useCollectionFeed'
+import CollectionFeedHeader from './components/CollectionFeedHeader.vue'
 import FeedCard from '@/views/feed/components/FeedCard.vue'
 import FeedEmpty from '@/views/feed/components/FeedEmpty.vue'
 
 const {
-  community,
-  invalidCommunity,
+  collection,
+  invalidCollection,
   items,
   loading,
   hasMore,
@@ -27,10 +27,10 @@ const {
   goToFindComments,
   goToUser,
   goToMap,
-  goToCommunity,
+  goToCollection,
   goToTag,
   goBack,
-} = useCommunityFeed()
+} = useCollectionFeed()
 
 const handleRefresh = async (event: CustomEvent) => {
   await refresh()
@@ -45,13 +45,13 @@ const handleInfinite = async (event: CustomEvent) => {
 
 <template>
   <ion-page>
-    <CommunityFeedHeader v-if="community" :community="community" @back="goBack" />
+    <CollectionFeedHeader v-if="collection" :collection="collection" @back="goBack" />
 
     <ion-content :fullscreen="true" class="[--background:#0E1F1A]">
-      <template v-if="invalidCommunity && !loading">
+      <template v-if="invalidCollection && !loading">
         <div class="flex flex-col items-center justify-center px-8 py-24 gap-4">
           <p class="text-white/40 text-sm font-body text-center m-0">
-            This community doesn&apos;t exist.
+            This collection doesn&apos;t exist.
           </p>
           <button
             type="button"
@@ -63,7 +63,7 @@ const handleInfinite = async (event: CustomEvent) => {
         </div>
       </template>
 
-      <template v-else-if="community">
+      <template v-else-if="collection">
         <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
           <ion-refresher-content pulling-icon="crescent" refreshing-spinner="crescent" />
         </ion-refresher>
@@ -85,7 +85,7 @@ const handleInfinite = async (event: CustomEvent) => {
             @tap-comment="goToFindComments"
             @tap-user="goToUser"
             @tap-location="(lat, lng, loc) => goToMap(lat, lng, loc)"
-            @tap-community="goToCommunity"
+            @tap-collection="goToCollection"
             @tap-tag="goToTag"
           />
         </div>

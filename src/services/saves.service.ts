@@ -16,7 +16,7 @@ const mapFindRow = (row: FindRow): FindDto => ({
   locationName: row.location_name,
   lat: nullableNumber(row.lat),
   lng: nullableNumber(row.lng),
-  community: row.community,
+  collection: row.community,
   badges: parseBadges(row.badges),
   tags: [],
   createdAt: row.created_at,

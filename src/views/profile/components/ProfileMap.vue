@@ -4,7 +4,7 @@ import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@/theme/map-markers.css'
 import type { FindDto } from '@/types'
-import { getCommunityColor } from '@/constants'
+import { getCollectionColor } from '@/constants'
 
 const props = defineProps<{
   finds: FindDto[]
@@ -24,11 +24,11 @@ const isNew = (createdAt: string): boolean =>
   Date.now() - new Date(createdAt).getTime() < 24 * 60 * 60 * 1000
 
 const createMarkerEl = (find: FindDto): HTMLElement => {
-  const color = getCommunityColor(find.community)
+  const color = getCollectionColor(find.collection)
   const wrapper = document.createElement('div')
   wrapper.className = 'find-marker-wrapper'
   wrapper.innerHTML = `
-    <div class="find-bubble${isNew(find.createdAt) ? ' is-new' : ''}" style="--community-color: ${color}">
+    <div class="find-bubble${isNew(find.createdAt) ? ' is-new' : ''}" style="--collection-color: ${color}">
       <img src="${find.imageUrl}" alt="" loading="lazy" />
     </div>
   `

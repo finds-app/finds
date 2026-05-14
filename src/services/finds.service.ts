@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 import type {
-  CommunityId,
-  CommunityPreviewDto,
+  CollectionId,
+  CollectionPreviewDto,
   CreateFindPayload,
   FeedItemDto,
   FindDetailDto,
@@ -9,7 +9,7 @@ import type {
   FindRow,
   MapFindDto,
 } from '@/types'
-import { COMMUNITIES } from '@/constants'
+import { COLLECTIONS } from '@/constants'
 import * as badgesService from './badges.service'
 import * as tagsService from './tags.service'
 import * as chainsService from './chains.service'
@@ -30,7 +30,7 @@ const mapFindRow = (row: FindRow): FindDto => ({
   locationName: row.location_name,
   lat: nullableNumber(row.lat),
   lng: nullableNumber(row.lng),
-  community: row.community,
+  collection: row.community,
   badges: parseBadges(row.badges),
   tags: [],
   createdAt: row.created_at,
@@ -58,7 +58,7 @@ const mapFeedRow = (row: FeedRowWithUser): FeedItemDto => ({
   locationName: row.location_name,
   lat: nullableNumber(row.lat),
   lng: nullableNumber(row.lng),
-  community: row.community as FeedItemDto['community'],
+  collection: row.community as FeedItemDto['collection'],
   badges: parseBadges(row.badges),
   tags: [],
   createdAt: row.created_at,
@@ -120,8 +120,8 @@ export const getFeed = async (cursor?: string): Promise<FeedItemDto[]> => {
   return mergeChainCountsIntoFeedItems(withTrending)
 }
 
-export const getCommunityFeed = async (
-  communityId: CommunityId,
+export const getCollectionFeed = async (
+  collectionId: CollectionId,
   cursor?: string,
 ): Promise<FeedItemDto[]> => {
   let query = supabase
@@ -129,7 +129,7 @@ export const getCommunityFeed = async (
     .select(
       'id, image_url, caption, location_name, lat, lng, community, badges, created_at, users(id, username, avatar_url), reactions(count), comments(count)',
     )
-    .eq('community', communityId)
+    .eq('community', collectionId)
     .order('created_at', { ascending: false })
     .limit(PAGE_SIZE)
 
@@ -209,16 +209,16 @@ interface PreviewRow {
   image_url: string
 }
 
-const fetchCommunityPreview = async (communityId: CommunityId): Promise<CommunityPreviewDto> => {
+const fetchCollectionPreview = async (collectionId: CollectionId): Promise<CollectionPreviewDto> => {
   const [countResult, previewResult] = await Promise.all([
     supabase
       .from('finds')
       .select('*', { count: 'exact', head: true })
-      .eq('community', communityId),
+      .eq('community', collectionId),
     supabase
       .from('finds')
       .select('image_url')
-      .eq('community', communityId)
+      .eq('community', collectionId)
       .order('created_at', { ascending: false })
       .limit(4),
   ])
@@ -228,14 +228,14 @@ const fetchCommunityPreview = async (communityId: CommunityId): Promise<Communit
 
   const rows = (previewResult.data ?? []) as PreviewRow[]
   return {
-    communityId,
+    collectionId,
     findCount: countResult.count ?? 0,
     previewImages: rows.map((r) => r.image_url),
   }
 }
 
-export const getCommunityPreviews = async (): Promise<CommunityPreviewDto[]> =>
-  Promise.all(COMMUNITIES.map((c) => fetchCommunityPreview(c.id)))
+export const getCollectionPreviews = async (): Promise<CollectionPreviewDto[]> =>
+  Promise.all(COLLECTIONS.map((c) => fetchCollectionPreview(c.id)))
 
 export const createFind = async (payload: CreateFindPayload): Promise<FindDto> => {
   const { data, error } = await supabase
@@ -247,7 +247,7 @@ export const createFind = async (payload: CreateFindPayload): Promise<FindDto> =
       location_name: payload.locationName,
       lat: payload.lat,
       lng: payload.lng,
-      community: payload.community,
+      community: payload.collection,
     })
     .select('*')
     .single()
@@ -260,7 +260,7 @@ export const createFind = async (payload: CreateFindPayload): Promise<FindDto> =
     userId: payload.userId,
     lat: nullableNumber(row.lat),
     lng: nullableNumber(row.lng),
-    community: payload.community,
+    collection: payload.collection,
   })
 
   const { error: badgeError } = await supabase.from('finds').update({ badges: staticBadges }).eq('id', row.id)
@@ -324,7 +324,7 @@ export const getFindDetail = async (findId: string): Promise<FindDetailDto | nul
     locationName: row.location_name,
     lat: nullableNumber(row.lat),
     lng: nullableNumber(row.lng),
-    community: row.community as FindDetailDto['community'],
+    collection: row.community as FindDetailDto['collection'],
     badges,
     tags,
     createdAt: row.created_at,
@@ -368,7 +368,7 @@ export const getFindsForMap = async (): Promise<MapFindDto[]> => {
     lat: Number(row.lat),
     lng: Number(row.lng),
     imageUrl: row.image_url,
-    community: row.community as MapFindDto['community'],
+    collection: row.community as MapFindDto['collection'],
     createdAt: row.created_at,
     user: { id: row.users.id, username: row.users.username },
   }))

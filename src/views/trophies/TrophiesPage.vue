@@ -21,10 +21,10 @@ const SECTIONS: { category: AchievementCategory; kicker: string; title: string; 
     blurb: 'When others pause on your finds.',
   },
   {
-    category: 'community',
+    category: 'collection',
     kicker: 'Seven lenses',
     title: 'Where you belong',
-    blurb: 'The communities you feed.',
+    blurb: 'The collections you feed.',
   },
 ]
 

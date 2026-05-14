@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ChainedFindDto } from '@/types'
-import { getCommunityColor } from '@/constants'
+import { getCollectionColor } from '@/constants'
 import { shortLocationName } from '@/utils/geocode'
 
 const props = defineProps<{
@@ -11,8 +11,8 @@ defineEmits<{
   'tap-find': [findId: string]
 }>()
 
-const ringStyle = (community: ChainedFindDto['community']) => ({
-  borderColor: getCommunityColor(community),
+const ringStyle = (collection: ChainedFindDto['collection']) => ({
+  borderColor: getCollectionColor(collection),
 })
 </script>
 
@@ -33,7 +33,7 @@ const ringStyle = (community: ChainedFindDto['community']) => ({
       >
         <div
           class="w-[76px] h-[76px] rounded-2xl overflow-hidden p-[2px] border-2 border-solid bg-white/[0.04]"
-          :style="ringStyle(c.community)"
+          :style="ringStyle(c.collection)"
         >
           <img :src="c.imageUrl" alt="" class="w-full h-full object-cover rounded-[12px] block" loading="lazy" />
         </div>

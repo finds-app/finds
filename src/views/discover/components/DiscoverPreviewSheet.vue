@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { MapFindDto } from '@/types'
-import { getCommunityColor, getCommunityLabel } from '@/constants'
+import { getCollectionColor, getCollectionLabel } from '@/constants'
 
 defineProps<{
   find: MapFindDto
@@ -29,11 +29,11 @@ const formatUsername = (username: string) => `@${username}`
             <div class="flex items-center gap-2 mb-1.5 flex-wrap">
               <span class="text-white/50 text-xs font-body">{{ formatUsername(find.user.username) }}</span>
               <span
-                v-if="find.community"
+                v-if="find.collection"
                 class="text-[10px] font-body px-2 py-0.5 rounded-full"
-                :style="{ background: `${getCommunityColor(find.community)}18`, color: getCommunityColor(find.community) }"
+                :style="{ background: `${getCollectionColor(find.collection)}18`, color: getCollectionColor(find.collection) }"
               >
-                {{ getCommunityLabel(find.community) }}
+                {{ getCollectionLabel(find.collection) }}
               </span>
             </div>
             <p class="text-white/80 text-sm font-body leading-snug line-clamp-2">a find worth seeing</p>

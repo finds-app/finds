@@ -51,11 +51,11 @@ watch(
       <textarea
         ref="textareaRef"
         :value="bioDraft"
-        @input="$emit('update:bioDraft', ($event.target as HTMLTextAreaElement).value)"
+        placeholder="Write something about yourself..."
         maxlength="150"
         rows="3"
-        placeholder="Write something about yourself..."
         class="w-full bg-white/[0.05] text-cream text-sm font-body rounded-xl px-4 py-3 border border-white/10 outline-none resize-none placeholder:text-white/20 focus:border-sage/40 transition-colors"
+        @input="$emit('update:bioDraft', ($event.target as HTMLTextAreaElement).value)"
       />
       <div class="flex items-center justify-end gap-2 mt-2">
         <button

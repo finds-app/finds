@@ -27,7 +27,7 @@ const {
   goToFindComments,
   goToUser,
   goToMap,
-  goToCommunity,
+  goToCollection,
   goToTag,
   goBack,
 } = useTagFeed()
@@ -89,7 +89,7 @@ const handleInfinite = async (event: CustomEvent) => {
             @tap-comment="goToFindComments"
             @tap-user="goToUser"
             @tap-location="(lat, lng, loc) => goToMap(lat, lng, loc)"
-            @tap-community="goToCommunity"
+            @tap-collection="goToCollection"
             @tap-tag="goToTag"
           />
         </div>

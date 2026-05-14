@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { IonIcon } from '@ionic/vue'
-import { mapOutline, personOutline, bookmarkOutline } from 'ionicons/icons'
-
 defineProps<{
   viewMode: 'grid' | 'map' | 'saved'
   isOwnProfile: boolean
@@ -26,7 +23,6 @@ const emit = defineEmits<{
         : 'bg-transparent text-white/35 active:text-white/50'"
       @click="emit('change', 'grid')"
     >
-      <ion-icon :icon="personOutline" class="text-base" />
       <span>Overview</span>
     </button>
     <button
@@ -37,7 +33,6 @@ const emit = defineEmits<{
         : 'bg-transparent text-white/35 active:text-white/50'"
       @click="emit('change', 'map')"
     >
-      <ion-icon :icon="mapOutline" class="text-base" />
       <span>Map</span>
     </button>
     <button
@@ -49,7 +44,6 @@ const emit = defineEmits<{
         : 'bg-transparent text-white/35 active:text-white/50'"
       @click="emit('change', 'saved')"
     >
-      <ion-icon :icon="bookmarkOutline" class="text-base" />
       <span>Saved</span>
     </button>
   </div>

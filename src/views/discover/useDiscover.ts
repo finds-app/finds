@@ -1,12 +1,10 @@
 import { ref, watch, nextTick } from 'vue'
-import { onIonViewDidEnter } from '@ionic/vue'
-import { useRoute } from 'vue-router'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { Geolocation } from '@capacitor/geolocation'
 import { Capacitor } from '@capacitor/core'
 import type { Map as MapboxMap } from 'mapbox-gl'
-import type { CommunityId, CommunityPreviewDto, MapFindDto } from '@/types'
-import { getCommunityPreviews, getFindsForMap } from '@/services/finds.service'
+import type { MapFindDto } from '@/types'
+import { getFindsForMap } from '@/services/finds.service'
 
 let mapInstance: MapboxMap | null = null
 
@@ -18,10 +16,6 @@ export const useDiscover = () => {
   const route = useRoute()
   const router = useRouter()
 
-  const viewMode = ref<'communities' | 'map'>('communities')
-  const communityPreviews = ref<CommunityPreviewDto[]>([])
-  const previewsLoading = ref(false)
-
   const finds = ref<MapFindDto[]>([])
   const selectedFind = ref<MapFindDto | null>(null)
   const userLocation = ref<[number, number] | null>(null)
@@ -31,6 +25,8 @@ export const useDiscover = () => {
   const locationError = ref(false)
   const incomingSearchQuery = ref<string | null>(null)
 
+  let pendingFly: { lng: number; lat: number; zoom: number } | null = null
+
   const loadFinds = async () => {
     loading.value = true
     try {
@@ -39,17 +35,6 @@ export const useDiscover = () => {
       // Failed to load map finds — leave markers empty
     } finally {
       loading.value = false
-    }
-  }
-
-  const loadCommunityPreviews = async () => {
-    previewsLoading.value = true
-    try {
-      communityPreviews.value = await getCommunityPreviews()
-    } catch {
-      // Failed to load previews — cards fall back to empty mosaic
-    } finally {
-      previewsLoading.value = false
     }
   }
 
@@ -70,11 +55,6 @@ export const useDiscover = () => {
     }
   }
 
-  const syncMapRouteToViewMode = () => {
-    const { lat, lng } = route.query
-    if (lat && lng) viewMode.value = 'map'
-  }
-
   const onMapReady = () => {
     mapReady.value = true
     loadFinds()
@@ -91,7 +71,6 @@ export const useDiscover = () => {
   watch(
     () => route.query,
     () => {
-      syncMapRouteToViewMode()
       if (mapReady.value) applyRouteQuery()
     },
     { immediate: true },
@@ -109,25 +88,6 @@ export const useDiscover = () => {
     if (!selectedFind.value) return
     router.push(`/find/${selectedFind.value.id}`)
   }
-
-  const goToCommunityFeed = (communityId: CommunityId) => {
-    router.push(`/community/${communityId}`)
-  }
-
-  const setViewMode = (mode: 'communities' | 'map') => {
-    viewMode.value = mode
-    if (mode === 'communities') {
-      mapReady.value = false
-      void loadCommunityPreviews()
-    }
-  }
-
-  const getPreview = (id: CommunityId): CommunityPreviewDto =>
-    communityPreviews.value.find((p) => p.communityId === id) ?? {
-      communityId: id,
-      findCount: 0,
-      previewImages: [],
-    }
 
   const flyToUser = async () => {
     if (locating.value) return
@@ -164,32 +124,16 @@ export const useDiscover = () => {
     locationError.value = false
   }
 
-  const flyTo = (lng: number, lat: number, zoom = 13) => {
-    if (!mapInstance) return
-    mapInstance.flyTo({ center: [lng, lat], zoom, duration: 1200 })
-  }
-
-  let pendingFly: { lng: number; lat: number; zoom: number } | null = null
-
-  /** Switch to map tab and fly to coordinates (e.g. unified search place pick). */
-  const switchToMapAndFly = (lng: number, lat: number, zoom = 13) => {
-    if (viewMode.value === 'map' && mapInstance) {
+  /** Fly to coordinates on the map (e.g. unified search place pick). */
+  const flyToCoords = (lng: number, lat: number, zoom = 13) => {
+    if (mapInstance && mapReady.value) {
       mapInstance.flyTo({ center: [lng, lat], zoom, duration: 1200 })
       return
     }
-
     pendingFly = { lng, lat, zoom }
-    viewMode.value = 'map'
   }
 
-  onIonViewDidEnter(() => {
-    if (viewMode.value === 'communities') void loadCommunityPreviews()
-  })
-
   return {
-    viewMode,
-    communityPreviews,
-    previewsLoading,
     finds,
     selectedFind,
     userLocation,
@@ -202,11 +146,7 @@ export const useDiscover = () => {
     selectFind,
     clearSelection,
     goToFindDetail,
-    goToCommunityFeed,
-    setViewMode,
-    getPreview,
     flyToUser,
-    flyTo,
-    switchToMapAndFly,
+    flyToCoords,
   }
 }

@@ -1,6 +1,6 @@
-import type { AchievementTemplateId, CommunityId } from '@/types'
+import type { AchievementTemplateId, CollectionId } from '@/types'
 
-export type AchievementCategory = 'general' | 'engagement' | 'community'
+export type AchievementCategory = 'general' | 'engagement' | 'collection'
 
 export interface AchievementTemplate {
   id: AchievementTemplateId
@@ -10,8 +10,8 @@ export interface AchievementTemplate {
   /** Target for progress bar (1 = binary) */
   goal: number
   category: AchievementCategory
-  /** Optional community lens for per-community trophies */
-  communityId?: CommunityId
+  /** Optional collection lens for per-collection trophies */
+  collectionId?: CollectionId
 }
 
 export const ACHIEVEMENT_TEMPLATES: AchievementTemplate[] = [
@@ -59,7 +59,7 @@ export const ACHIEVEMENT_TEMPLATES: AchievementTemplate[] = [
   {
     id: 'renaissance',
     label: 'Renaissance',
-    description: 'Post in all 7 communities',
+    description: 'Post in all 7 collections',
     icon: '🎨',
     goal: 7,
     category: 'general',
@@ -97,15 +97,15 @@ export const ACHIEVEMENT_TEMPLATES: AchievementTemplate[] = [
     goal: 50,
     category: 'engagement',
   },
-  // Community — sorted rarest last
+  // Collection — sorted rarest last
   {
     id: 'rare_eye',
     label: 'Rare eye',
     description: '5 finds in Rare & bizarre',
     icon: '🔮',
     goal: 5,
-    category: 'community',
-    communityId: 'rare_bizarre',
+    category: 'collection',
+    collectionId: 'rare_bizarre',
   },
   {
     id: 'preservationist',
@@ -113,8 +113,8 @@ export const ACHIEVEMENT_TEMPLATES: AchievementTemplate[] = [
     description: "5 finds in Before it's gone",
     icon: '🏛️',
     goal: 5,
-    category: 'community',
-    communityId: 'before_its_gone',
+    category: 'collection',
+    collectionId: 'before_its_gone',
   },
   {
     id: 'pattern_spotter',
@@ -122,8 +122,8 @@ export const ACHIEVEMENT_TEMPLATES: AchievementTemplate[] = [
     description: '5 finds in Patterns',
     icon: '🔷',
     goal: 5,
-    category: 'community',
-    communityId: 'patterns',
+    category: 'collection',
+    collectionId: 'patterns',
   },
   {
     id: 'local_expert',
@@ -131,8 +131,8 @@ export const ACHIEVEMENT_TEMPLATES: AchievementTemplate[] = [
     description: '10 finds in Hyperlocal',
     icon: '📌',
     goal: 10,
-    category: 'community',
-    communityId: 'hyperlocal',
+    category: 'collection',
+    collectionId: 'hyperlocal',
   },
   {
     id: 'beauty_seeker',
@@ -140,8 +140,8 @@ export const ACHIEVEMENT_TEMPLATES: AchievementTemplate[] = [
     description: '10 finds in Everyday beauty',
     icon: '✿',
     goal: 10,
-    category: 'community',
-    communityId: 'everyday_beauty',
+    category: 'collection',
+    collectionId: 'everyday_beauty',
   },
 ]
 

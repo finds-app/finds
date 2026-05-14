@@ -171,8 +171,8 @@ export const useTagFeed = () => {
     ionRouter.navigate(buildMapRoute(lat, lng, locationName), 'root', 'push')
   }
 
-  const goToCommunity = (communityId: string) => {
-    router.push(`/community/${communityId}`)
+  const goToCollection = (collectionId: string) => {
+    router.push(`/collection/${collectionId}`)
   }
 
   const goToTag = (t: string) => {
@@ -215,7 +215,7 @@ export const useTagFeed = () => {
     goToFindComments,
     goToUser,
     goToMap,
-    goToCommunity,
+    goToCollection,
     goToTag,
     goToPostLinked,
     goBack,

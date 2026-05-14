@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 import type { BadgeId } from '@/constants/badges'
-import type { CommunityId } from '@/types'
+import type { CollectionId } from '@/types'
 
 const EARTH_KM = 6371
 
@@ -24,7 +24,7 @@ export interface ComputeStaticBadgesInput {
   userId: string
   lat: number | null
   lng: number | null
-  community: CommunityId | null
+  collection: CollectionId | null
 }
 
 export const computeStaticBadges = async (input: ComputeStaticBadgesInput): Promise<BadgeId[]> => {
@@ -69,17 +69,17 @@ export const computeStaticBadges = async (input: ComputeStaticBadgesInput): Prom
 
   if (othersWithin5km.length === 0) badges.push('first_here')
 
-  if (input.community) {
+  if (input.collection) {
     const latMin50 = latNum - 50 / 111
     const latMax50 = latNum + 50 / 111
     const lngD50 = lngDeltaForKm(latNum, 50)
     const lngMin50 = lngNum - lngD50
     const lngMax50 = lngNum + lngD50
 
-    const { data: communityRows, error: communityError } = await supabase
+    const { data: collectionRows, error: collectionError } = await supabase
       .from('finds')
       .select('id, lat, lng')
-      .eq('community', input.community)
+      .eq('community', input.collection)
       .neq('id', input.findId)
       .not('lat', 'is', null)
       .not('lng', 'is', null)
@@ -88,9 +88,9 @@ export const computeStaticBadges = async (input: ComputeStaticBadgesInput): Prom
       .gte('lng', lngMin50)
       .lte('lng', lngMax50)
 
-    if (communityError) throw communityError
+    if (collectionError) throw collectionError
 
-    const othersWithin50km = (communityRows ?? []).filter((r: { lat: unknown; lng: unknown }) => {
+    const othersWithin50km = (collectionRows ?? []).filter((r: { lat: unknown; lng: unknown }) => {
       const la = Number(r.lat)
       const ln = Number(r.lng)
       return haversineKm(latNum, lngNum, la, ln) <= 50

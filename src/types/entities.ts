@@ -1,4 +1,4 @@
-export type CommunityId =
+export type CollectionId =
   | 'rare_bizarre'
   | 'everyday_beauty'
   | 'hyperlocal'
@@ -7,8 +7,8 @@ export type CommunityId =
   | 'human_traces'
   | 'overlooked_ordinary'
 
-export interface Community {
-  id: CommunityId
+export interface Collection {
+  id: CollectionId
   label: string
   color: string
   description: string
@@ -19,7 +19,7 @@ export interface MapFind {
   lat: number
   lng: number
   imageUrl: string
-  community: CommunityId | null
+  collection: CollectionId | null
   createdAt: string
   user: { id: string; username: string }
 }
@@ -44,7 +44,7 @@ export interface ChainedFind {
   id: string
   imageUrl: string
   locationName: string | null
-  community: CommunityId | null
+  collection: CollectionId | null
   user: { id: string; username: string }
 }
 
@@ -56,7 +56,7 @@ export interface Find {
   locationName: string | null
   lat: number | null
   lng: number | null
-  community: CommunityId | null
+  collection: CollectionId | null
   badges: string[]
   tags: string[]
   createdAt: string
@@ -71,7 +71,7 @@ export interface FeedItem {
   locationName: string | null
   lat: number | null
   lng: number | null
-  community: CommunityId | null
+  collection: CollectionId | null
   badges: string[]
   tags: string[]
   createdAt: string
@@ -95,7 +95,7 @@ export interface FindDetail {
   locationName: string | null
   lat: number | null
   lng: number | null
-  community: CommunityId | null
+  collection: CollectionId | null
   badges: string[]
   tags: string[]
   createdAt: string

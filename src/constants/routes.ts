@@ -12,7 +12,7 @@ export const ROUTES = {
   trophies: '/tabs/tab4',
   userProfile: '/user/:userId',
   findDetail: '/find/:findId',
-  communityFeed: '/community/:communityId',
+  collectionFeed: '/collection/:collectionId',
   tagFeed: '/tag/:tag',
   notifications: '/notifications',
 } as const

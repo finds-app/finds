@@ -6,6 +6,6 @@
 
   <h1 class="font-display font-bold text-cream text-4xl leading-tight mb-2">You're in.</h1>
   <p class="font-body font-light text-white/50 text-sm leading-relaxed mb-8">
-    Last step - pick a username so the community can find you.
+    Last step - pick a username so others can find you.
   </p>
 </template>

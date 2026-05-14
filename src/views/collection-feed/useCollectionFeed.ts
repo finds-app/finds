@@ -1,33 +1,33 @@
 import { ref } from 'vue'
 import { onIonViewDidEnter, useIonRouter } from '@ionic/vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { Community, FeedItemDto } from '@/types'
-import { COMMUNITIES, buildMapRoute, buildTagRoute, pushUserProfile, ROUTES } from '@/constants'
+import type { Collection, FeedItemDto } from '@/types'
+import { COLLECTIONS, buildMapRoute, buildTagRoute, pushUserProfile, ROUTES } from '@/constants'
 import * as findsService from '@/services/finds.service'
 import * as achievementsService from '@/services/achievements.service'
 import { useReactions } from '@/composables/useReactions'
 import { useAchievementCelebration } from '@/composables/useAchievementCelebration'
 import { useAuthStore } from '@/stores/auth'
 
-export const useCommunityFeed = () => {
+export const useCollectionFeed = () => {
   const route = useRoute()
   const router = useRouter()
   const ionRouter = useIonRouter()
 
-  const community = ref<Community | null>(null)
-  const invalidCommunity = ref(false)
+  const collection = ref<Collection | null>(null)
+  const invalidCollection = ref(false)
 
   const syncRoute = () => {
-    const id = route.params.communityId as string
-    const resolved = COMMUNITIES.find((c) => c.id === id) ?? null
-    community.value = resolved
-    invalidCommunity.value = !resolved
+    const id = route.params.collectionId as string
+    const resolved = COLLECTIONS.find((c) => c.id === id) ?? null
+    collection.value = resolved
+    invalidCollection.value = !resolved
   }
 
   syncRoute()
 
   const items = ref<FeedItemDto[]>([])
-  const loading = ref(!!community.value && !invalidCommunity.value)
+  const loading = ref(!!collection.value && !invalidCollection.value)
   const refreshing = ref(false)
   const hasMore = ref(true)
   const error = ref('')
@@ -45,7 +45,7 @@ export const useCommunityFeed = () => {
   const load = async () => {
     syncRoute()
 
-    if (!community.value) {
+    if (!collection.value) {
       items.value = []
       loading.value = false
       return
@@ -54,7 +54,7 @@ export const useCommunityFeed = () => {
     loading.value = true
     error.value = ''
     try {
-      const data = await findsService.getCommunityFeed(community.value.id)
+      const data = await findsService.getCollectionFeed(collection.value.id)
       items.value = await enrich(data)
       hasMore.value = data.length >= 20
     } catch (e: unknown) {
@@ -67,7 +67,7 @@ export const useCommunityFeed = () => {
   const refresh = async () => {
     syncRoute()
 
-    if (!community.value) {
+    if (!collection.value) {
       items.value = []
       return
     }
@@ -75,7 +75,7 @@ export const useCommunityFeed = () => {
     refreshing.value = true
     error.value = ''
     try {
-      const data = await findsService.getCommunityFeed(community.value.id)
+      const data = await findsService.getCollectionFeed(collection.value.id)
       items.value = await enrich(data)
       hasMore.value = data.length >= 20
     } catch (e: unknown) {
@@ -86,11 +86,11 @@ export const useCommunityFeed = () => {
   }
 
   const loadMore = async () => {
-    if (!community.value || loading.value || !hasMore.value || items.value.length === 0) return
+    if (!collection.value || loading.value || !hasMore.value || items.value.length === 0) return
     loading.value = true
     try {
       const cursor = items.value[items.value.length - 1].createdAt
-      const data = await findsService.getCommunityFeed(community.value.id, cursor)
+      const data = await findsService.getCollectionFeed(collection.value.id, cursor)
       const enriched = await enrich(data)
       items.value.push(...enriched)
       hasMore.value = data.length >= 20
@@ -169,8 +169,8 @@ export const useCommunityFeed = () => {
     ionRouter.navigate(buildMapRoute(lat, lng, locationName), 'root', 'push')
   }
 
-  const goToCommunity = (communityId: string) => {
-    router.push(`/community/${communityId}`)
+  const goToCollection = (collectionId: string) => {
+    router.push(`/collection/${collectionId}`)
   }
 
   const goToTag = (tag: string) => {
@@ -188,8 +188,8 @@ export const useCommunityFeed = () => {
   onIonViewDidEnter(load)
 
   return {
-    community,
-    invalidCommunity,
+    collection,
+    invalidCollection,
     items,
     loading,
     refreshing,
@@ -203,7 +203,7 @@ export const useCommunityFeed = () => {
     goToFindComments,
     goToUser,
     goToMap,
-    goToCommunity,
+    goToCollection,
     goToTag,
     goToPostLinked,
     goBack,

@@ -3,7 +3,7 @@ import type {
   AchievementTemplateId,
   ChainedFind,
   Comment,
-  CommunityId,
+  CollectionId,
   FeedItem,
   Find,
   FindDetail,
@@ -50,7 +50,7 @@ export interface CreateFindPayload {
   locationName: string | null
   lat: number | null
   lng: number | null
-  community: CommunityId | null
+  collection: CollectionId | null
   /** Normalized tags (0–3); server-side normalization also applied */
   tags?: string[]
 }
@@ -89,8 +89,8 @@ export interface UploadedFileDto {
   publicUrl: string
 }
 
-export interface CommunityPreviewDto {
-  communityId: CommunityId
+export interface CollectionPreviewDto {
+  collectionId: CollectionId
   findCount: number
   previewImages: string[]
 }

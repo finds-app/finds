@@ -1,4 +1,4 @@
-import type { CommunityId } from './entities'
+import type { CollectionId } from './entities'
 
 export interface UserRow {
   id: string
@@ -17,7 +17,7 @@ export interface FindRow {
   location_name: string | null
   lat: number | string | null
   lng: number | string | null
-  community: CommunityId | null
+  community: CollectionId | null
   badges: string[] | null
   created_at: string
 }

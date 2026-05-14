@@ -168,8 +168,8 @@ export const useFindDetail = () => {
     ionRouter.navigate(buildMapRoute(find.value.lat, find.value.lng, find.value.locationName), 'root', 'push')
   }
 
-  const goToCommunity = (communityId: string) => {
-    router.push(`/community/${communityId}`)
+  const goToCollection = (collectionId: string) => {
+    router.push(`/collection/${collectionId}`)
   }
 
   const goToTag = (tag: string) => {
@@ -369,7 +369,7 @@ export const useFindDetail = () => {
     toggleSave,
     goToUser,
     goToMap,
-    goToCommunity,
+    goToCollection,
     goToTag,
     goBack,
     goToPostLinked,

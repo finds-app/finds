@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { IonPage, IonContent, IonButton } from '@ionic/vue'
-import { COMMUNITY_COLORS, ROUTES } from '@/constants'
+import { COLLECTION_COLORS, ROUTES } from '@/constants'
 </script>
 
 <template>
@@ -25,13 +25,13 @@ import { COMMUNITY_COLORS, ROUTES } from '@/constants'
         >things worth a second look</p>
 
         <p class="font-body font-light text-white/40 text-sm leading-relaxed max-w-[280px] mt-1 mb-8">
-          A community of curious eyes. Share the rare, the beautiful,
+          A collection of curious eyes. Share the rare, the beautiful,
           the disappearing, the overlooked.
         </p>
 
         <div class="flex gap-2 mb-12">
           <span
-            v-for="color in COMMUNITY_COLORS"
+            v-for="color in COLLECTION_COLORS"
             :key="color"
             class="w-2 h-2 rounded-full opacity-80"
             :style="{ background: color }"

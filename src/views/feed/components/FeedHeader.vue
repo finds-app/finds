@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { IonIcon } from '@ionic/vue'
-import { planetOutline, peopleOutline } from 'ionicons/icons'
-
 defineProps<{
-  feedMode: 'forYou' | 'following'
+  feedMode: 'forYou' | 'following' | 'collections'
 }>()
 
 defineEmits<{
-  'update:feedMode': [mode: 'forYou' | 'following']
+  'update:feedMode': [mode: 'forYou' | 'following' | 'collections']
 }>()
 </script>
 
@@ -26,25 +23,33 @@ defineEmits<{
       >
         <button
           type="button"
-          class="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-xs font-body font-medium border-0 transition-colors"
+          class="px-3 py-2 rounded-[10px] text-xs font-body font-medium border-0 transition-colors"
           :class="feedMode === 'forYou'
             ? 'bg-white/[0.12] text-cream'
             : 'bg-transparent text-white/35 active:text-white/50'"
           @click="$emit('update:feedMode', 'forYou')"
         >
-          <ion-icon :icon="planetOutline" class="text-base" />
-          <span>For you</span>
+          For you
         </button>
         <button
           type="button"
-          class="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-xs font-body font-medium border-0 transition-colors"
+          class="px-3 py-2 rounded-[10px] text-xs font-body font-medium border-0 transition-colors"
           :class="feedMode === 'following'
             ? 'bg-white/[0.12] text-sage'
             : 'bg-transparent text-white/35 active:text-white/50'"
           @click="$emit('update:feedMode', 'following')"
         >
-          <ion-icon :icon="peopleOutline" class="text-base" />
-          <span>Following</span>
+          Following
+        </button>
+        <button
+          type="button"
+          class="px-3 py-2 rounded-[10px] text-xs font-body font-medium border-0 transition-colors"
+          :class="feedMode === 'collections'
+            ? 'bg-white/[0.12] text-sage'
+            : 'bg-transparent text-white/35 active:text-white/50'"
+          @click="$emit('update:feedMode', 'collections')"
+        >
+          Collections
         </button>
       </div>
     </div>

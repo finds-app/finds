@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 import type { ChainedFindDto, CreateFindLinkPayload, FindDto, FindRow } from '@/types'
-import type { CommunityId } from '@/types/entities'
+import type { CollectionId } from '@/types/entities'
 
 interface ChainedFindRow {
   id: string
@@ -14,7 +14,7 @@ const mapChainedRow = (row: ChainedFindRow): ChainedFindDto => ({
   id: row.id,
   imageUrl: row.image_url,
   locationName: row.location_name,
-  community: row.community as CommunityId | null,
+  collection: row.community as CollectionId | null,
   user: { id: row.users.id, username: row.users.username },
 })
 
@@ -32,7 +32,7 @@ const mapFindRow = (row: FindRow): FindDto => ({
   locationName: row.location_name,
   lat: nullableNumber(row.lat),
   lng: nullableNumber(row.lng),
-  community: row.community,
+  collection: row.community,
   badges: parseBadges(row.badges),
   tags: [],
   createdAt: row.created_at,

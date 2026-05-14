@@ -5,7 +5,7 @@ import type {
   AchievementDto,
   AchievementProgressDto,
   AchievementTemplateId,
-  CommunityId,
+  CollectionId,
 } from '@/types'
 import type { AchievementRow } from '@/types/supabase'
 import * as followsService from './follows.service'
@@ -64,12 +64,12 @@ interface UserFindStats {
   totalFinds: number
   distinctCountries: number
   distinctCities: number
-  distinctCommunities: Set<CommunityId>
-  communityCounts: Record<CommunityId, number>
+  distinctCollections: Set<CollectionId>
+  collectionCounts: Record<CollectionId, number>
   maxHeartsOnAnyFind: number
 }
 
-const ALL_COMMUNITY_IDS: CommunityId[] = [
+const ALL_COLLECTION_IDS: CollectionId[] = [
   'rare_bizarre',
   'everyday_beauty',
   'hyperlocal',
@@ -87,13 +87,13 @@ const gatherUserFindStats = async (userId: string): Promise<UserFindStats> => {
 
   if (error) throw error
 
-  const rows = (findRows ?? []) as { id: string; location_name: string | null; community: CommunityId | null }[]
+  const rows = (findRows ?? []) as { id: string; location_name: string | null; community: CollectionId | null }[]
   const countryKeys = new Set<string>()
   const cityKeys = new Set<string>()
-  const distinctCommunities = new Set<CommunityId>()
-  const communityCounts = {} as Record<CommunityId, number>
-  for (const id of ALL_COMMUNITY_IDS) {
-    communityCounts[id] = 0
+  const distinctCollections = new Set<CollectionId>()
+  const collectionCounts = {} as Record<CollectionId, number>
+  for (const id of ALL_COLLECTION_IDS) {
+    collectionCounts[id] = 0
   }
 
   for (const r of rows) {
@@ -107,8 +107,8 @@ const gatherUserFindStats = async (userId: string): Promise<UserFindStats> => {
       }
     }
     if (r.community) {
-      distinctCommunities.add(r.community)
-      communityCounts[r.community] += 1
+      distinctCollections.add(r.community)
+      collectionCounts[r.community] += 1
     }
   }
 
@@ -136,14 +136,14 @@ const gatherUserFindStats = async (userId: string): Promise<UserFindStats> => {
     totalFinds: rows.length,
     distinctCountries: countryKeys.size,
     distinctCities: cityKeys.size,
-    distinctCommunities,
-    communityCounts,
+    distinctCollections,
+    collectionCounts,
     maxHeartsOnAnyFind,
   }
 }
 
-const hasRenaissance = (distinct: Set<CommunityId>): boolean =>
-  ALL_COMMUNITY_IDS.every((id) => distinct.has(id))
+const hasRenaissance = (distinct: Set<CollectionId>): boolean =>
+  ALL_COLLECTION_IDS.every((id) => distinct.has(id))
 
 export const checkAfterPost = async (userId: string): Promise<AchievementTemplateId[]> => {
   const unlocked = await fetchUnlockedTemplateIds(userId)
@@ -156,15 +156,15 @@ export const checkAfterPost = async (userId: string): Promise<AchievementTemplat
   if (!unlocked.has('globe_trotter') && stats.distinctCountries >= 3) candidates.push('globe_trotter')
   if (!unlocked.has('world_traveler') && stats.distinctCountries >= 7) candidates.push('world_traveler')
   if (!unlocked.has('city_explorer') && stats.distinctCities >= 5) candidates.push('city_explorer')
-  if (!unlocked.has('renaissance') && hasRenaissance(stats.distinctCommunities)) candidates.push('renaissance')
+  if (!unlocked.has('renaissance') && hasRenaissance(stats.distinctCollections)) candidates.push('renaissance')
   if (!unlocked.has('curator') && stats.maxHeartsOnAnyFind >= 10) candidates.push('curator')
   if (!unlocked.has('beloved') && stats.maxHeartsOnAnyFind >= 50) candidates.push('beloved')
 
-  if (!unlocked.has('rare_eye') && stats.communityCounts.rare_bizarre >= 5) candidates.push('rare_eye')
-  if (!unlocked.has('preservationist') && stats.communityCounts.before_its_gone >= 5) candidates.push('preservationist')
-  if (!unlocked.has('pattern_spotter') && stats.communityCounts.patterns >= 5) candidates.push('pattern_spotter')
-  if (!unlocked.has('local_expert') && stats.communityCounts.hyperlocal >= 10) candidates.push('local_expert')
-  if (!unlocked.has('beauty_seeker') && stats.communityCounts.everyday_beauty >= 10) candidates.push('beauty_seeker')
+  if (!unlocked.has('rare_eye') && stats.collectionCounts.rare_bizarre >= 5) candidates.push('rare_eye')
+  if (!unlocked.has('preservationist') && stats.collectionCounts.before_its_gone >= 5) candidates.push('preservationist')
+  if (!unlocked.has('pattern_spotter') && stats.collectionCounts.patterns >= 5) candidates.push('pattern_spotter')
+  if (!unlocked.has('local_expert') && stats.collectionCounts.hyperlocal >= 10) candidates.push('local_expert')
+  if (!unlocked.has('beauty_seeker') && stats.collectionCounts.everyday_beauty >= 10) candidates.push('beauty_seeker')
 
   const newly: AchievementTemplateId[] = []
   for (const template of candidates) {
@@ -236,16 +236,16 @@ const progressCurrent = (template: AchievementTemplate, stats: UserFindStats, fo
     case 'city_explorer':
       return Math.min(stats.distinctCities, template.goal)
     case 'renaissance':
-      return Math.min(stats.distinctCommunities.size, template.goal)
+      return Math.min(stats.distinctCollections.size, template.goal)
     case 'curator':
     case 'beloved':
       return Math.min(stats.maxHeartsOnAnyFind, template.goal)
     case 'first_follower':
       return Math.min(followersCount, template.goal)
     default: {
-      const cid = template.communityId
+      const cid = template.collectionId
       if (!cid) return 0
-      return Math.min(stats.communityCounts[cid] ?? 0, template.goal)
+      return Math.min(stats.collectionCounts[cid] ?? 0, template.goal)
     }
   }
 }

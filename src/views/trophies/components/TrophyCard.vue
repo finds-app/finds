@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import type { AchievementTemplate } from '@/constants/achievements'
 import type { AchievementCategory } from '@/constants/achievements'
 import type { AchievementProgressDto } from '@/types'
-import { COMMUNITIES } from '@/constants'
+import { COLLECTIONS } from '@/constants'
 
 const props = defineProps<{
   template: AchievementTemplate
@@ -11,13 +11,13 @@ const props = defineProps<{
 }>()
 
 const accent = computed(() => {
-  if (props.template.communityId) {
-    return COMMUNITIES.find((c) => c.id === props.template.communityId)?.color ?? '#52B788'
+  if (props.template.collectionId) {
+    return COLLECTIONS.find((c) => c.id === props.template.collectionId)?.color ?? '#52B788'
   }
   const byCat: Record<AchievementCategory, string> = {
     general: '#52B788',
     engagement: '#F2CC60',
-    community: '#85B7EB',
+    collection: '#85B7EB',
   }
   return byCat[props.template.category]
 })

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { IonIcon } from '@ionic/vue'
 import { locationOutline, linkOutline } from 'ionicons/icons'
-import { COMMUNITIES, BADGE_DISPLAY_ORDER, getBadgeDefinition } from '@/constants'
+import { COLLECTIONS, BADGE_DISPLAY_ORDER, getBadgeDefinition } from '@/constants'
 import type { FeedItemDto } from '@/types'
 import { shortLocationName } from '@/utils/geocode'
 import HeartButton from './HeartButton.vue'
 import SaveButton from './SaveButton.vue'
 import CommentButton from './CommentButton.vue'
-import MediaCommunityPill from './MediaCommunityPill.vue'
+import MediaCollectionPill from './MediaCollectionPill.vue'
 
 const props = defineProps<{
   item: FeedItemDto
@@ -20,12 +20,12 @@ const emit = defineEmits<{
   tapComment: [findId: string]
   tapUser: [userId: string]
   tapLocation: [lat: number, lng: number, locationName: string]
-  tapCommunity: [communityId: string]
+  tapCollection: [collectionId: string]
   tapTag: [tag: string]
 }>()
 
-const communityMeta = props.item.community
-  ? COMMUNITIES.find((c) => c.id === props.item.community)
+const collectionMeta = props.item.collection
+  ? COLLECTIONS.find((c) => c.id === props.item.collection)
   : null
 
 const sortedBadges = BADGE_DISPLAY_ORDER.filter((id) => (props.item.badges ?? []).includes(id))
@@ -54,12 +54,12 @@ const onLocationTap = (e: Event) => {
 
       <div class="pointer-events-none absolute left-2 right-2 top-2 flex items-start justify-between gap-2">
         <div class="flex flex-wrap gap-1">
-          <MediaCommunityPill
-            v-if="communityMeta"
-            :community="item.community!"
-            :label="communityMeta.label"
-            :color="communityMeta.color"
-            @tap="$emit('tapCommunity', item.community!)"
+          <MediaCollectionPill
+            v-if="collectionMeta"
+            :collection="item.collection!"
+            :label="collectionMeta.label"
+            :color="collectionMeta.color"
+            @tap="$emit('tapCollection', item.collection!)"
           />
         </div>
 

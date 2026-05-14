@@ -6,7 +6,7 @@ import { useImagePicker } from '@/composables/useImagePicker'
 import { usePostLocation } from '@/composables/usePostLocation'
 import { usePostFind } from './usePostFind'
 import PostFindCaptionField from './components/PostFindCaptionField.vue'
-import PostFindCommunityPicker from './components/PostFindCommunityPicker.vue'
+import PostFindCollectionPicker from './components/PostFindCollectionPicker.vue'
 import PostFindTagInput from './components/PostFindTagInput.vue'
 import PostFindError from './components/PostFindError.vue'
 import PostFindHeader from './components/PostFindHeader.vue'
@@ -57,7 +57,7 @@ watch(
   { immediate: true },
 )
 
-const { caption, community, tags, canPost, posting, postError, toggleCommunity, post } = usePostFind({
+const { caption, collection, tags, canPost, posting, postError, toggleCollection, post } = usePostFind({
   imageBlob,
   locationName,
   lat,
@@ -109,7 +109,7 @@ watch(photoGps, (gps) => {
         </div>
 
         <div class="border-t border-white/[0.06]">
-          <PostFindCommunityPicker :selected-community="community" @select="toggleCommunity" />
+          <PostFindCollectionPicker :selected-collection="collection" @select="toggleCollection" />
         </div>
 
         <div class="border-t border-white/[0.06]">

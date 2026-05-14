@@ -3,7 +3,7 @@ import type { Ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { ROUTES } from '@/constants'
-import type { CommunityId } from '@/types'
+import type { CollectionId } from '@/types'
 import * as findsService from '@/services/finds.service'
 import * as storageService from '@/services/storage.service'
 import * as achievementsService from '@/services/achievements.service'
@@ -24,15 +24,15 @@ export const usePostFind = ({ imageBlob, locationName, lat, lng, linkToFindId }:
   const { celebrateSequence } = useAchievementCelebration()
 
   const caption = ref('')
-  const community = ref<CommunityId | null>(null)
+  const collection = ref<CollectionId | null>(null)
   const tags = ref<string[]>([])
   const posting = ref(false)
   const postError = ref('')
 
   const canPost = computed(() => !!imageBlob.value && !!locationName.value && lat.value !== null && lng.value !== null && !posting.value)
 
-  const toggleCommunity = (id: CommunityId) => {
-    community.value = community.value === id ? null : id
+  const toggleCollection = (id: CollectionId) => {
+    collection.value = collection.value === id ? null : id
   }
 
   const post = async (): Promise<void> => {
@@ -51,7 +51,7 @@ export const usePostFind = ({ imageBlob, locationName, lat, lng, linkToFindId }:
         locationName: locationName.value || null,
         lat: lat.value,
         lng: lng.value,
-        community: community.value,
+        collection: collection.value,
         tags: tags.value,
       })
       if (parentId) {
@@ -81,5 +81,5 @@ export const usePostFind = ({ imageBlob, locationName, lat, lng, linkToFindId }:
     }
   }
 
-  return { caption, community, tags, canPost, posting, postError, toggleCommunity, post }
+  return { caption, collection, tags, canPost, posting, postError, toggleCollection, post }
 }

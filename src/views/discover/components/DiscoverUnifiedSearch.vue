@@ -14,7 +14,6 @@ import { useSearch, type PlaceSearchResult } from '../useSearch'
 
 const props = defineProps<{
   initialQuery?: string | null
-  viewMode?: 'communities' | 'map'
 }>()
 
 const emit = defineEmits<{
@@ -47,16 +46,6 @@ watch(
     }
   },
   { immediate: true },
-)
-
-watch(
-  () => props.viewMode,
-  (mode) => {
-    if (mode === 'communities') {
-      blurInput()
-      clear()
-    }
-  },
 )
 
 const inputRef = ref<HTMLInputElement | null>(null)

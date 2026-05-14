@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { IonHeader, IonToolbar, IonIcon } from '@ionic/vue'
 import { arrowBackOutline } from 'ionicons/icons'
-import type { Community } from '@/types'
+import type { Collection } from '@/types'
 
 defineProps<{
-  community: Community
+  collection: Collection
 }>()
 
 defineEmits<{
@@ -28,13 +28,13 @@ defineEmits<{
         <div class="flex-1 flex items-center justify-center gap-2 min-w-0 pr-10">
           <span
             class="w-2 h-2 rounded-full shrink-0 shadow-sm"
-            :style="{ backgroundColor: community.color }"
+            :style="{ backgroundColor: collection.color }"
           />
           <span
             class="truncate font-display font-semibold text-base tracking-tight"
-            :style="{ color: community.color }"
+            :style="{ color: collection.color }"
           >
-            {{ community.label }}
+            {{ collection.label }}
           </span>
         </div>
       </div>

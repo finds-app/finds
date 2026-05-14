@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { BADGE_DISPLAY_ORDER, getBadgeDefinition } from '@/constants'
-import type { CommunityId } from '@/types'
-import MediaCommunityPill from '@/views/feed/components/MediaCommunityPill.vue'
+import type { CollectionId } from '@/types'
+import MediaCollectionPill from '@/views/feed/components/MediaCollectionPill.vue'
 
 const props = defineProps<{
   imageUrl: string
   caption: string | null
   badges: string[]
-  community: CommunityId | null
-  communityLabel: string | null
-  communityColor: string | null
+  collection: CollectionId | null
+  collectionLabel: string | null
+  collectionColor: string | null
 }>()
 
 defineEmits<{
-  tapCommunity: [communityId: CommunityId]
+  tapCollection: [collectionId: CollectionId]
 }>()
 
 const sortedBadges = computed(() => BADGE_DISPLAY_ORDER.filter((id) => props.badges.includes(id)))
@@ -50,14 +50,14 @@ const sortedBadges = computed(() => BADGE_DISPLAY_ORDER.filter((id) => props.bad
     <div class="absolute inset-x-0 bottom-[-1px] h-24 bg-gradient-to-t from-app to-transparent pointer-events-none" />
 
     <div
-      v-if="community && communityLabel && communityColor"
+      v-if="collection && collectionLabel && collectionColor"
       class="pointer-events-none absolute left-5 bottom-8 flex"
     >
-      <MediaCommunityPill
-        :community="community"
-        :label="communityLabel"
-        :color="communityColor"
-        @tap="$emit('tapCommunity', community)"
+      <MediaCollectionPill
+        :collection="collection"
+        :label="collectionLabel"
+        :color="collectionColor"
+        @tap="$emit('tapCollection', collection)"
       />
     </div>
   </div>

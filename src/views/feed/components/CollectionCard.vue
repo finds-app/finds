@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { Community } from '@/types'
+import type { Collection } from '@/types'
 
 const props = defineProps<{
-  community: Community
+  collection: Collection
   findCount: number
   previewImages: string[]
 }>()
@@ -21,7 +21,7 @@ const imageAt = (index: number): string | null =>
   <button
     type="button"
     class="relative w-full rounded-3xl overflow-hidden border border-white/[0.08] bg-white/[0.03] text-left min-h-[280px] active:scale-[0.98] transition-transform duration-150 shadow-lg shadow-black/30"
-    :style="{ boxShadow: `0 16px 48px rgba(0,0,0,0.35), inset 0 -3px 0 0 ${community.color}44` }"
+    :style="{ boxShadow: `0 16px 48px rgba(0,0,0,0.35), inset 0 -3px 0 0 ${collection.color}44` }"
     @click="$emit('tap')"
   >
     <!-- Mosaic -->
@@ -42,7 +42,7 @@ const imageAt = (index: number): string | null =>
           v-else
           class="absolute inset-0 opacity-40"
           :style="{
-            background: `linear-gradient(145deg, ${community.color}33 0%, transparent 55%)`,
+            background: `linear-gradient(145deg, ${collection.color}33 0%, transparent 55%)`,
           }"
         />
       </div>
@@ -58,17 +58,17 @@ const imageAt = (index: number): string | null =>
       <div class="flex items-center gap-2 mb-2">
         <span
           class="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
-          :style="{ backgroundColor: community.color }"
+          :style="{ backgroundColor: collection.color }"
         />
         <span
           class="font-display font-bold text-cream text-xl leading-tight tracking-tight"
         >
-          {{ community.label }}
+          {{ collection.label }}
         </span>
       </div>
 
       <p class="text-white/60 text-sm font-body leading-relaxed line-clamp-3 mb-4 m-0">
-        {{ community.description }}
+        {{ collection.description }}
       </p>
 
       <div class="flex items-center gap-2">

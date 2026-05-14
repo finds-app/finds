@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { IonPage, IonContent } from '@ionic/vue'
 import { useFindDetail } from './useFindDetail'
 import { useAuthStore } from '@/stores/auth'
-import { COMMUNITIES } from '@/constants'
+import { COLLECTIONS } from '@/constants'
 import FindDetailHeader from './components/FindDetailHeader.vue'
 import FindDetailImage from './components/FindDetailImage.vue'
 import FindDetailInfo from './components/FindDetailInfo.vue'
@@ -47,7 +47,7 @@ const {
   toggleSave,
   goToUser,
   goToMap,
-  goToCommunity,
+  goToCollection,
   goToTag,
   goBack,
   goToPostLinked,
@@ -63,10 +63,10 @@ const {
   goToCommentUser,
 } = useFindDetail()
 
-const communityMeta = computed(() => {
-  const id = find.value?.community
+const collectionMeta = computed(() => {
+  const id = find.value?.collection
   if (!id) return null
-  return COMMUNITIES.find((c) => c.id === id) ?? null
+  return COLLECTIONS.find((c) => c.id === id) ?? null
 })
 </script>
 
@@ -82,10 +82,10 @@ const communityMeta = computed(() => {
           :image-url="find.imageUrl"
           :caption="find.caption"
           :badges="find.badges"
-          :community="find.community"
-          :community-label="communityMeta?.label ?? null"
-          :community-color="communityMeta?.color ?? null"
-          @tap-community="goToCommunity"
+          :collection="find.collection"
+          :collection-label="collectionMeta?.label ?? null"
+          :collection-color="collectionMeta?.color ?? null"
+          @tap-collection="goToCollection"
         />
         <FindDetailInfo
           :find="find"

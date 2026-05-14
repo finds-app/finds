@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { CommunityId } from '@/types'
+import type { CollectionId } from '@/types'
 
 defineProps<{
-  community: CommunityId
+  collection: CollectionId
   label: string
   color: string
 }>()
@@ -21,7 +21,7 @@ defineEmits<{
       color,
       border: `1px solid ${color}66`,
     }"
-    :aria-label="`View ${label} community`"
+    :aria-label="`View ${label} collection`"
     @click="$emit('tap')"
   >
     {{ label }}

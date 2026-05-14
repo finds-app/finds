@@ -7,7 +7,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 2.5px solid var(--community-color, #52B788);
+  border: 2.5px solid var(--collection-color, #52B788);
   overflow: hidden;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.7);
   transition: transform 150ms ease, box-shadow 150ms ease;
@@ -37,7 +37,7 @@
   position: absolute;
   inset: -6px;
   border-radius: 50%;
-  border: 2px solid var(--community-color, #52B788);
+  border: 2px solid var(--collection-color, #52B788);
   opacity: 0.6;
   animation: find-pulse-ring 2.2s ease-out infinite;
   pointer-events: none;
