@@ -374,6 +374,16 @@ export const getFindsForMap = async (): Promise<MapFindDto[]> => {
   }))
 }
 
+export const deleteFind = async (findId: string, userId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('finds')
+    .delete()
+    .eq('id', findId)
+    .eq('user_id', userId)
+
+  if (error) throw error
+}
+
 export const getFindsByUser = async (userId: string): Promise<FindDto[]> => {
   const { data, error } = await supabase
     .from('finds')

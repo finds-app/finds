@@ -5,6 +5,21 @@ import { supabase } from './supabase'
 export const buildFindImagePath = (userId: string): string =>
   `${userId}/${crypto.randomUUID()}.${IMAGE_UPLOAD.extension}`
 
+/**
+ * Extracts the storage object path (e.g. `userId/uuid.jpg`) from a Supabase
+ * public URL. Returns null if the URL does not match the expected bucket.
+ */
+export const extractStoragePathFromUrl = (
+  url: string,
+  bucket = STORAGE_BUCKETS.findsImages,
+): string | null => {
+  if (!url) return null
+  const marker = `/storage/v1/object/public/${bucket}/`
+  const idx = url.indexOf(marker)
+  if (idx === -1) return null
+  return url.slice(idx + marker.length)
+}
+
 export const uploadImage = async (
   path: string,
   blob: Blob,
@@ -30,4 +45,12 @@ export const uploadImage = async (
 
   const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(path)
   return { path, publicUrl }
+}
+
+export const deleteImage = async (
+  path: string,
+  bucket = STORAGE_BUCKETS.findsImages,
+): Promise<void> => {
+  const { error } = await supabase.storage.from(bucket).remove([path])
+  if (error) throw error
 }

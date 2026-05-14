@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { IonIcon, IonSpinner, IonTextarea } from '@ionic/vue'
 import { sendOutline, trashOutline } from 'ionicons/icons'
 import type { CommentDto } from '@/types'
 import { MAX_COMMENT_LENGTH } from '@/services/comments.service'
 import { timeAgo } from '@/utils/time'
+import ConfirmSheet from '@/components/ConfirmSheet.vue'
 
 const props = defineProps<{
   comments: CommentDto[]
@@ -26,6 +27,27 @@ const trimmedLength = computed(() => props.newCommentText.trim().length)
 const canSubmit = computed(
   () => !props.submitting && trimmedLength.value > 0 && trimmedLength.value <= MAX_COMMENT_LENGTH,
 )
+
+const deleteSheetOpen = ref(false)
+const pendingDeleteId = ref<string | null>(null)
+
+const requestRemove = (commentId: string) => {
+  pendingDeleteId.value = commentId
+  deleteSheetOpen.value = true
+}
+
+const confirmRemove = () => {
+  if (pendingDeleteId.value) {
+    emit('remove', pendingDeleteId.value)
+  }
+  deleteSheetOpen.value = false
+  pendingDeleteId.value = null
+}
+
+const cancelRemove = () => {
+  deleteSheetOpen.value = false
+  pendingDeleteId.value = null
+}
 
 const onInput = (value: string) => {
   emit('update:newCommentText', value)
@@ -92,7 +114,7 @@ const onKeydown = (event: KeyboardEvent) => {
           type="button"
           class="bg-transparent border-0 p-1 m-0 shrink-0 active:opacity-60 transition-opacity"
           aria-label="Delete comment"
-          @click="$emit('remove', c.id)"
+          @click="requestRemove(c.id)"
         >
           <ion-icon :icon="trashOutline" class="text-white/30 text-base" />
         </button>
@@ -127,5 +149,15 @@ const onKeydown = (event: KeyboardEvent) => {
     <p v-if="errorMessage" class="text-ember text-xs font-body m-0 mt-2">
       {{ errorMessage }}
     </p>
+
+    <ConfirmSheet
+      :open="deleteSheetOpen"
+      title="Delete comment?"
+      message="This comment will be permanently removed."
+      confirm-label="Delete"
+      confirm-color="ember"
+      @confirm="confirmRemove"
+      @cancel="cancelRemove"
+    />
   </section>
 </template>

@@ -15,6 +15,7 @@ import * as savesService from '@/services/saves.service'
 import * as achievementsService from '@/services/achievements.service'
 import * as chainsService from '@/services/chains.service'
 import * as commentsService from '@/services/comments.service'
+import * as storageService from '@/services/storage.service'
 import { buildMapRoute, buildTagRoute, pushUserProfile, ROUTES } from '@/constants'
 import { useAchievementCelebration } from '@/composables/useAchievementCelebration'
 
@@ -43,6 +44,9 @@ export const useFindDetail = () => {
   const commentError = ref('')
   const newCommentText = ref('')
 
+  const deleteSheetOpen = ref(false)
+  const deleteSubmitting = ref(false)
+
   type DetailTab = 'comments' | 'linked'
   const activeTab = ref<DetailTab>('comments')
 
@@ -57,6 +61,11 @@ export const useFindDetail = () => {
   const showNoticedToo = computed(() => {
     const uid = authStore.user?.id
     return !!uid && uid !== find.value?.user.id
+  })
+
+  const isOwner = computed(() => {
+    const uid = authStore.user?.id
+    return !!uid && uid === find.value?.user.id
   })
 
   const refreshChains = async (findId: string) => {
@@ -287,6 +296,39 @@ export const useFindDetail = () => {
     pushUserProfile(router, userId, authStore.user?.id)
   }
 
+  const openDeleteSheet = () => {
+    if (!isOwner.value) return
+    deleteSheetOpen.value = true
+  }
+
+  const closeDeleteSheet = () => {
+    if (deleteSubmitting.value) return
+    deleteSheetOpen.value = false
+  }
+
+  const deleteFind = async () => {
+    const uid = authStore.user?.id
+    const target = find.value
+    if (!uid || !target || target.user.id !== uid || deleteSubmitting.value) return
+
+    deleteSubmitting.value = true
+    try {
+      await findsService.deleteFind(target.id, uid)
+
+      const imagePath = storageService.extractStoragePathFromUrl(target.imageUrl)
+      if (imagePath) {
+        void storageService.deleteImage(imagePath).catch(() => {
+          /* find row is gone; ignore orphan image cleanup failure */
+        })
+      }
+
+      deleteSheetOpen.value = false
+      void router.replace(ROUTES.feed)
+    } catch {
+      deleteSubmitting.value = false
+    }
+  }
+
   watch(
     () => route.params.findId,
     () => {
@@ -317,6 +359,12 @@ export const useFindDetail = () => {
     activeTab,
     setActiveTab,
     showNoticedToo,
+    isOwner,
+    deleteSheetOpen,
+    deleteSubmitting,
+    openDeleteSheet,
+    closeDeleteSheet,
+    deleteFind,
     toggleReaction,
     toggleSave,
     goToUser,

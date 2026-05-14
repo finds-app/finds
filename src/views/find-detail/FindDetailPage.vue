@@ -14,6 +14,7 @@ import FindChainActions from './components/FindChainActions.vue'
 import LinkFindModal from './components/LinkFindModal.vue'
 import LikesListModal from './components/LikesListModal.vue'
 import CommentsSection from './components/CommentsSection.vue'
+import ConfirmSheet from '@/components/ConfirmSheet.vue'
 
 const authStore = useAuthStore()
 
@@ -36,6 +37,12 @@ const {
   activeTab,
   setActiveTab,
   showNoticedToo,
+  isOwner,
+  deleteSheetOpen,
+  deleteSubmitting,
+  openDeleteSheet,
+  closeDeleteSheet,
+  deleteFind,
   toggleReaction,
   toggleSave,
   goToUser,
@@ -83,6 +90,7 @@ const communityMeta = computed(() => {
         <FindDetailInfo
           :find="find"
           :show-noticed-too="showNoticedToo"
+          :is-owner="isOwner"
           @toggle-reaction="toggleReaction"
           @toggle-save="toggleSave"
           @noticed-too="goToPostLinked"
@@ -90,6 +98,7 @@ const communityMeta = computed(() => {
           @tap-location="goToMap"
           @tap-tag="goToTag"
           @tap-likes="openLikesModal"
+          @delete="openDeleteSheet"
         />
 
         <div class="mx-5 h-px bg-white/[0.06] mt-4" />
@@ -144,6 +153,17 @@ const communityMeta = computed(() => {
           :loading="likesModalLoading"
           @close="closeLikesModal"
           @tap-user="goToLikedUser"
+        />
+
+        <ConfirmSheet
+          :open="deleteSheetOpen"
+          title="Delete this find?"
+          message="This will permanently remove the find, its comments, and reactions. This can't be undone."
+          confirm-label="Delete"
+          confirm-color="ember"
+          :loading="deleteSubmitting"
+          @confirm="deleteFind"
+          @cancel="closeDeleteSheet"
         />
       </template>
 

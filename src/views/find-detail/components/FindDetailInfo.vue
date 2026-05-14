@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { IonIcon } from '@ionic/vue'
-import { locationOutline, cameraOutline } from 'ionicons/icons'
+import { locationOutline, cameraOutline, trashOutline } from 'ionicons/icons'
 import type { FindDetailDto } from '@/types'
 import { timeAgo } from '@/utils/time'
 import { shortLocationName } from '@/utils/geocode'
@@ -10,6 +10,7 @@ import SaveButton from '@/views/feed/components/SaveButton.vue'
 defineProps<{
   find: FindDetailDto
   showNoticedToo: boolean
+  isOwner: boolean
 }>()
 
 defineEmits<{
@@ -20,6 +21,7 @@ defineEmits<{
   tapLocation: []
   tapTag: [tag: string]
   tapLikes: []
+  delete: []
 }>()
 </script>
 
@@ -74,7 +76,18 @@ defineEmits<{
           <span class="text-white/30 text-[11px] font-body">@{{ find.user.username }}</span>
         </div>
       </button>
-      <span class="text-white/20 text-[11px] font-body">{{ timeAgo(find.createdAt) }}</span>
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="text-white/20 text-[11px] font-body">{{ timeAgo(find.createdAt) }}</span>
+        <button
+          v-if="isOwner"
+          type="button"
+          aria-label="Delete find"
+          class="flex items-center justify-center w-7 h-7 rounded-full bg-white/[0.04] border-0 m-0 active:opacity-60 active:bg-ember/10 transition-colors"
+          @click="$emit('delete')"
+        >
+          <ion-icon :icon="trashOutline" class="text-white/40 text-sm" />
+        </button>
+      </div>
     </div>
 
     <p v-if="find.caption" class="text-cream/85 text-[15px] font-body leading-relaxed m-0 pb-3">
